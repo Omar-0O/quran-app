@@ -1,103 +1,136 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { surahList, SurahInfoBasic } from './data/surahList'; // Import the Surah type
+
+export default function HomePage() {
+  const [filter, setFilter] = useState<'all' | 'meccan' | 'medinan'>('all');
+  const [searchTerm, setSearchTerm] = useState(''); // State for search term
+
+  // Filter Surahs based on revelation type and search term
+  const filteredSurahs = useMemo(() => {
+    let surahs = surahList;
+
+    // Filter by revelation type
+    if (filter === 'meccan') {
+      surahs = surahs.filter(surah => surah.revelationType === 'Meccan');
+    } else if (filter === 'medinan') {
+      surahs = surahs.filter(surah => surah.revelationType === 'Medinan');
+    }
+
+    // Filter by search term (Arabic name)
+    if (searchTerm.trim() !== '') {
+        const lowerCaseSearchTerm = searchTerm.trim().toLowerCase(); // No need for Arabic lowercasing
+        surahs = surahs.filter(surah =>
+            surah.name.includes(lowerCaseSearchTerm) // Direct substring match for Arabic
+        );
+    }
+
+    return surahs;
+  }, [filter, searchTerm]); // Add searchTerm dependency
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="min-h-screen p-6 md:p-10 bg-pattern">
+      <div className="max-w-4xl mx-auto fade-in">
+        <header className="text-center mb-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">القرآن الكريم</h1>
+          <p className="text-lg md:text-xl text-foreground/80">
+            تصفح سور القرآن الكريم للقراءة والاستماع والتحميل.
+          </p>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* Restored and Styled Surah Classification Legend */}
+        <section aria-labelledby="surah-types-heading" className="mb-8 p-5 quran-card bg-background/70 backdrop-blur-sm rounded-lg border border-border-color scale-in">
+           <h3 id="surah-types-heading" className="text-lg font-semibold text-primary mb-3 text-center">أنواع السور في القرآن</h3>
+           <p className="text-center text-foreground/80 text-sm leading-relaxed mb-4 max-w-xl mx-auto">
+               السور المكية هي التي نزلت قبل الهجرة إلى المدينة المنورة، وتتميز بآياتها القصيرة غالباً ومعالجتها للعقيدة. أما السور المدنية فهي التي نزلت بعد الهجرة، وتتميز بآياتها الطويلة وتناولها للتشريعات والمعاملات.
+           </p>
+           <div className="flex justify-center items-center gap-6 text-sm font-medium border-t border-border-color/50 pt-4">
+               <div className="flex items-center gap-2">
+                   <span className="block w-3 h-3 rounded-full bg-orange-600/80" title="مكية"></span>
+                   <span>مكية</span>
+               </div>
+               <div className="flex items-center gap-2">
+                    <span className="block w-3 h-3 rounded-full bg-teal-600/80" title="مدنية"></span>
+                    <span>مدنية</span>
+               </div>
+           </div>
+       </section>
+
+        {/* Controls: Filter buttons and Search Box */}
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          {/* Filter Buttons */}
+          <div className="flex gap-2 flex-wrap justify-center">
+            <button
+              onClick={() => setFilter('all')}
+              className={`filter-button ${filter === 'all' ? 'active' : ''}`}
+            >
+              جميع السور
+            </button>
+            <button
+              onClick={() => setFilter('meccan')}
+              className={`filter-button ${filter === 'meccan' ? 'active' : ''}`}
+            >
+              السور المكية
+            </button>
+            <button
+              onClick={() => setFilter('medinan')}
+              className={`filter-button ${filter === 'medinan' ? 'active' : ''}`}
+            >
+              السور المدنية
+            </button>
+          </div>
+
+          {/* Search Input */}
+           <div className="relative w-full sm:w-auto">
+               <input
+                 type="search"
+                 placeholder="ابحث عن سورة..."
+                 value={searchTerm}
+                 onChange={(e) => setSearchTerm(e.target.value)}
+                 className="input pr-8 w-full sm:w-64" // Added padding for icon
+                 aria-label="البحث عن سورة بالاسم"
+               />
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40 pointer-events-none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+           </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Surah List Grid */}
+        {filteredSurahs.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredSurahs.map((surah: SurahInfoBasic) => (
+              <Link key={surah.number} href={`/surah/${surah.number}`}>
+                <div className="quran-card h-full p-5 flex justify-between items-center hover-lift scale-in" title={`سورة ${surah.name} (${surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}) - ${surah.numberOfAyahs} آيات`}>
+                  <div className="text-right">
+                    <p className="text-sm text-primary font-medium mb-1">
+                      رقم {surah.number.toLocaleString('ar-EG')}
+                    </p>
+                    <h2 className="text-xl font-quran font-semibold text-foreground">
+                      {surah.name}
+                    </h2>
+                  </div>
+                  <div className="text-left flex flex-col items-end">
+                     <p className="text-md font-sans font-medium text-foreground/90 mb-1">
+                        {surah.numberOfAyahs.toLocaleString('ar-EG')} آيات
+                    </p>
+                    <div className="flex items-center gap-1.5" title={surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}>
+                        <span className={`block w-2.5 h-2.5 rounded-full ${surah.revelationType === 'Meccan' ? 'bg-orange-600/80' : 'bg-teal-600/80'}`}></span>
+                        <span className={`text-xs font-medium ${surah.revelationType === 'Meccan' ? 'text-orange-600' : 'text-teal-600'}`}>
+                           {surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}
+                       </span>
+                   </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+           <div className="text-center py-10 text-foreground/60">
+               <p>لم يتم العثور على سور تطابق بحثك.</p>
+           </div>
+        )}
+      </div>
+    </main>
   );
 }

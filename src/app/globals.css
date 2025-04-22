@@ -1,26 +1,323 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap'); /* Ensure Amiri Quran is available if not using next/font */
 @import "tailwindcss";
+@import "./styles/animations.css"; /* Keep animations for now, can remove later if needed */
 
+/* New Theme Variables (Arabic-First, Warm, Light) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fdfbf6; /* Soft cream background */
+  --foreground: #3a2e28; /* Dark warm brown text */
+  --primary: #5d7a6a; /* Calming dark green */
+  --primary-light: #8aa897; /* Lighter shade of green */
+  --secondary: #a08c6d; /* Soft beige/gold for accents */
+  --accent: #b96d40; /* Warm terracotta accent for interaction */
+  --accent-rgb: 185, 109, 64;
+  --card-bg: #ffffff; /* White cards for clean contrast */
+  --border-color: #e8e1d2; /* Subtle border color */
+  --tafsir-bg: #f9f6f0; /* Slightly different bg for Tafsir modal */
+  --scrollbar-track: #f0ebd7;
+  --scrollbar-thumb: #c5ba99;
+  
+  /* Typography */
+  --font-quran: 'Amiri Quran', 'Amiri', serif; /* Main font for Quran text */
+  --font-ui: 'Noto Sans Arabic', sans-serif; /* Font for UI elements */
+
+  --shadow-sm: 0 2px 8px rgba(58, 46, 40, 0.06);
+  --shadow-md: 0 4px 12px rgba(58, 46, 40, 0.08);
+  --radius-sm: 0.3rem;
+  --radius-md: 0.6rem;
+  --radius-lg: 0.8rem;
+}
+
+/* Dark Mode Theme Variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a202c; /* Deep cool grey/blue */
+    --foreground: #e2e8f0; /* Light grey text */
+    --primary: #68d391; /* Brighter green for primary elements */
+    --primary-light: #48bb78; /* Darker shade of green */
+    --secondary: #a0aec0; /* Cool grey for secondary accents */
+    --accent: #f6ad55; /* Keep the warm orange accent */
+    --accent-rgb: 246, 173, 85;
+    --card-bg: #2d3748; /* Darker card background */
+    --border-color: #4a5568; /* Lighter border for contrast */
+    --tafsir-bg: #2a303b; /* Specific background for Tafsir (if re-added later) */
+    --scrollbar-track: #2d3748;
+    --scrollbar-thumb: #4a5568;
+
+    /* Dark mode specific shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Adjustments for specific elements in dark mode */
+  .quran-card {
+      border-color: var(--border-color);
+  }
+
+   .bismillah {
+     color: var(--accent); /* Ensure Bismillah uses accent color */
+   }
+
+   .verse-number-decorator {
+     color: var(--primary-light); /* Use lighter green for verse numbers */
+   }
+
+   .ayah-highlight {
+     background-color: rgba(var(--accent-rgb), 0.25); /* Slightly stronger highlight */
+   }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Use the new font variables */
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-ui); /* Or specific mono if needed */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-ui); /* Default to UI font */
+  line-height: 1.8; /* Increase line height for readability */
+  font-size: 16px; /* Base font size */
+  direction: rtl; /* Ensure RTL direction */
 }
+
+/* Base heading styles */
+h1, h2, h3 {
+  font-family: var(--font-ui);
+  color: var(--primary);
+  margin-bottom: 0.75em;
+}
+
+h1 { font-size: 2.25rem; font-weight: 600; }
+ h2 { font-size: 1.75rem; font-weight: 600; }
+ h3 { font-size: 1.25rem; font-weight: 500; }
+
+/* Quran Text Styling */
+.font-quran, .font-arabic {
+  font-family: var(--font-quran) !important; /* Use Quran font */
+  font-size: 1.8rem; /* Base font size for Quran text */
+  line-height: 2.5; /* Generous line height */
+  color: var(--foreground);
+  /* text-align: justify; */ /* Changed to center in component */
+}
+
+/* Specific adjustments for different screen sizes */
+@media (min-width: 768px) {
+  body { font-size: 17px; }
+  .font-quran, .font-arabic { font-size: 2.2rem; line-height: 2.7; }
+}
+
+@media (min-width: 1024px) {
+  body { font-size: 18px; }
+  .font-quran, .font-arabic { font-size: 2.5rem; line-height: 2.9; }
+}
+
+/* Link Styles */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: var(--primary);
+}
+
+/* Basic Card Style */
+.quran-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  padding: 1.5rem;
+}
+
+.quran-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+
+/* Button Styles (Simple, Clear) */
+button, .button {
+  font-family: var(--font-ui);
+  background-color: var(--primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+button:hover, .button:hover {
+  background-color: var(--accent);
+}
+
+button:disabled, .button:disabled {
+  background-color: var(--secondary);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Outline Button Style */
+.button-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 0.7rem 1.45rem;
+}
+
+.button-outline:hover {
+  background-color: var(--primary-light);
+  color: white;
+  border-color: var(--primary-light);
+}
+
+/* Icon Button Style (for Audio, Tafsir etc) */
+.icon-button {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--primary);
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary-light);
+  color: white;
+  transform: scale(1.05);
+}
+.icon-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Bismillah Style - Centered, Distinct */
+.bismillah {
+  font-family: var(--font-quran); /* Use the specific Quran font */
+  font-size: 2.8rem; /* Make it notably larger */
+  text-align: center;
+  color: var(--accent); /* Use accent color for distinction */
+  margin: 1.5rem 0 2.5rem 0; /* Adjust vertical spacing */
+  line-height: 1.5;
+  font-weight: normal; /* Ensure it's not bold unless desired */
+}
+
+@media (max-width: 768px) {
+  .bismillah {
+    font-size: 2.2rem; /* Slightly smaller on mobile */
+    margin: 1rem 0 2rem 0;
+  }
+}
+
+/* Verse Number Style */
+.verse-number-decorator {
+  font-family: var(--font-ui); /* Use UI font for numbers */
+  display: inline-block;
+  font-size: 0.7em; /* Relative to the main Quran text size */
+  color: var(--primary); /* Use primary color */
+  margin: 0 0.5ch; /* Space around the number */
+  vertical-align: middle; /* Align better with text */
+  font-weight: normal;
+}
+
+/* Simplify revelation type display (use color dot or Arabic text if available) */
+.revelation-indicator {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  margin-right: 0.5rem; /* Adjust margin for RTL */
+}
+.revelation-meccan {
+  background-color: var(--primary-light);
+}
+.revelation-medinan {
+  background-color: var(--secondary);
+}
+
+/* Tafsir Modal specific */
+.tafsir-modal-content {
+  background-color: var(--tafsir-bg);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 2rem;
+  line-height: 2;
+}
+
+.tafsir-modal-content .font-arabic {
+  font-size: 1.5rem; /* Slightly smaller for Tafsir */
+  line-height: 2.2;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
+}
+
+/* Remove old specific component classes if they conflict */
+/* .surah-number, .verse-number, .action-button, .action-button-outline, .tafsir-container, .ayah-container ... potentially remove or adapt */
+
+/* Helper class for visually hidden text (for accessibility) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Background pattern (Activated) */
+.bg-pattern {
+  /* Subtle repeating dot pattern */
+  background-image: radial-gradient(circle at 1px 1px, rgba(var(--accent-rgb), 0.08) 1px, transparent 0);
+  background-size: 12px 12px; /* Adjust size for desired density */
+  background-position: 0 0;
+}
+
+/* Ayah Highlighting Styles */
+.ayah-highlight {
+  background-color: rgba(var(--accent-rgb), 0.2); /* Use accent color with transparency */
+  border-radius: var(--radius-sm);
+  padding: 0.1em 0.3em;
+  margin: -0.1em -0.3em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: background-color 0.3s ease-out; /* Smooth transition */
+}
+
+/* Optional: Style for currently playing ayah segment (if needed later) */
+/* .ayah-playing {
+  color: var(--accent);
+} */ 
