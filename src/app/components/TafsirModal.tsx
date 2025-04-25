@@ -1,6 +1,7 @@
+ // TafsirModel.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface TafsirModalProps {
   isOpen: boolean;
@@ -29,19 +30,8 @@ export default function TafsirModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchTafsir();
-    }
-    // Reset state when modal closes or ayah changes
-    return () => {
-       setTafsir(null);
-       setError('');
-       setLoading(false);
-    }
-  }, [isOpen, surahNumber, ayahNumber, tafsirEdition]);
-
-  const fetchTafsir = async () => {
+  // Use useCallback to memoize the fetchTafsir function
+  const fetchTafsir = useCallback(async () => {
     setLoading(true);
     setError('');
     setTafsir(null); // Clear previous tafsir
@@ -59,15 +49,27 @@ export default function TafsirModal({
         });
       } else {
         console.error("Unexpected API response structure:", data);
-        throw new Error('فشل تحميل بيانات التفسير. استجابة غير متوقعة من الخادم.'); // Arabic error
+        throw new Error('فشل تحميل بيانات التفسير. استجابة غير متوقعة من الخادم.');
       }
-    } catch (err: any) { // Add type annotation for err
+    } catch (err: any) {
       console.error('Error fetching tafsir:', err);
-      setError(err.message || 'تعذر تحميل التفسير في الوقت الحالي. يرجى المحاولة مرة أخرى لاحقاً.'); // Arabic error
+      setError(err.message || 'تعذر تحميل التفسير في الوقت الحالي. يرجى المحاولة مرة أخرى لاحقاً.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [surahNumber, ayahNumber, tafsirEdition]);  // Add the dependencies here
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchTafsir();
+    }
+    // Reset state when modal closes or ayah changes
+    return () => {
+      setTafsir(null);
+      setError('');
+      setLoading(false);
+    };
+  }, [isOpen, fetchTafsir]); // Add fetchTafsir to the dependency array
 
   if (!isOpen) return null;
 
@@ -83,12 +85,12 @@ export default function TafsirModal({
         {/* Modal Header */}
         <div className="p-4 border-b border-border-color flex justify-between items-center bg-primary/5 flex-shrink-0">
           <h2 className="text-lg font-semibold font-ui text-primary">
-             تفسير الآية {ayahNumber.toLocaleString('ar-EG')} من سورة ( {surahNumber.toLocaleString('ar-EG')} ) {/* Dynamic title */}
+            تفسير الآية {ayahNumber.toLocaleString('ar-EG')} من سورة ( {surahNumber.toLocaleString('ar-EG')} )
           </h2>
           <button
             onClick={onClose}
             className="icon-button w-8 h-8 text-foreground/70 hover:bg-accent hover:text-white"
-            aria-label="إغلاق" // Arabic close label
+            aria-label="إغلاق"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -102,11 +104,11 @@ export default function TafsirModal({
           {loading ? (
             <div className="flex justify-center items-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-              <span>جاري تحميل التفسير...</span>{/* Arabic loading */}
+              <span>جاري تحميل التفسير...</span>
             </div>
           ) : error ? (
             <div className="p-6 text-center text-red-600">
-              <p className="font-semibold mb-2">خطأ</p>{/* Arabic error */}
+              <p className="font-semibold mb-2">خطأ</p>
               <p>{error}</p>
             </div>
           ) : tafsir ? (
@@ -122,12 +124,12 @@ export default function TafsirModal({
               </div>
             </div>
           ) : (
-             <div className="p-6 text-center text-foreground/70">
-               <p>لا يوجد بيانات لعرضها.</p> {/* Arabic no data */}
-             </div>
-           )}
+            <div className="p-6 text-center text-foreground/70">
+              <p>لا يوجد بيانات لعرضها.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-} 
+}

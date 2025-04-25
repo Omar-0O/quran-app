@@ -1,3 +1,4 @@
+ // src/page.tsx
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -36,7 +37,7 @@ export default function HomePage() {
         <header className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">القرآن الكريم</h1>
           <p className="text-lg md:text-xl text-foreground/80">
-            تصفح سور القرآن الكريم للقراءة والاستماع والتحميل.
+          تصفح سور القرآن الكريم للقراءة والاستماع والتحميل صدقة جارية عن اموات المسلمين اجمعين, نسألكم الدعاء
           </p>
         </header>
 
