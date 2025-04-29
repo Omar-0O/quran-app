@@ -29,7 +29,10 @@ const RECITERS: Reciter[] = [
   { id: 2, name: 'محمود خليل الحصري' },
   { id: 7, name: 'مشاري بن راشد العفاسي' },
   { id: 1, name: 'عبد الباسط عبد الصمد (مرتل)' },
-  { id: 6, name: 'عبد الله بصفر' },
+  { id: 4, name: 'عبد الله بصفر' },
+  { id: 3, name: 'عبد الرحمن السديس' },
+  { id: 11, name: 'سعود الشريم' },
+  { id: 5, name: 'سعد الغامدي' },
   // { id: ???, name: 'هزاع البلوشي' }, // يجب البحث عن المعرف الخاص بهزاع البلوشي في Quran.com API
 ];
 
@@ -77,16 +80,18 @@ export default function SurahPage() {
 
       try {
         // استخدام واجهة alquran.cloud التي لا تحتاج لترجمة (النص العربي الأصلي)
-        const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahId}`);
+        const baseUrl = process.env.NEXT_PUBLIC_QURAN_CLOUD_API_URL || 'https://api.alquran.cloud/v1';
+        const response = await fetch(`${baseUrl}/surah/${surahId}`);
         const data = await response.json();
         if (data.code === 200 && data.data) {
           setSurah(data.data);
         } else {
           throw new Error('فشل تحميل بيانات السورة.'); // رسالة خطأ عربية
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('خطأ في جلب بيانات السورة:', err);
-        setFetchError(err.message || 'حدث خطأ غير متوقع أثناء تحميل السورة.'); // رسالة خطأ عربية
+        const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع أثناء تحميل السورة.';
+        setFetchError(message);
       } finally {
         setLoading(false);
       }
@@ -137,7 +142,8 @@ export default function SurahPage() {
         setIsSurahPlaying(false); // Stop playing if reciter changes
 
         try {
-            const response = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${selectedReciter.id}/${surahId}`);
+            const baseUrl = process.env.NEXT_PUBLIC_QURAN_COM_API_URL || 'https://api.quran.com/api/v4';
+            const response = await fetch(`${baseUrl}/chapter_recitations/${selectedReciter.id}/${surahId}`);
             if (!response.ok) {
                  // Throw Arabic error
                 throw new Error(`فشل في جلب ملف الصوت (خطأ ${response.status})`);
@@ -157,10 +163,11 @@ export default function SurahPage() {
                 // Throw Arabic error
                 throw new Error('لم يتم العثور على الملف الصوتي في الاستجابة.');
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("خطأ في جلب رابط صوت السورة:", err);
              // Set Arabic error
-            setAudioError(err.message || 'خطأ في تحميل رابط الصوت.');
+            const message = err instanceof Error ? err.message : 'خطأ في تحميل رابط الصوت.';
+            setAudioError(message);
         } finally {
              setIsAudioLoading(false);
         }
@@ -238,12 +245,12 @@ export default function SurahPage() {
       try {
           // Attempt to play the audio
           await audioRef.current.play();
-          // The 'playing' event listener will set loading to false
           setIsSurahPlaying(true); // Update state to playing
-      } catch (err) {
+      } catch (err: unknown) {
           console.error("خطأ في تشغيل الصوت:", err);
            // Set Arabic error message
-          setAudioError('لم يتمكن المتصفح من تشغيل الملف الصوتي.');
+          const message = err instanceof Error ? err.message : 'لم يتمكن المتصفح من تشغيل الملف الصوتي.';
+          setAudioError(message);
           setIsAudioLoading(false); // Hide loading on error
           setIsSurahPlaying(false); // Reset playing state on error
       }

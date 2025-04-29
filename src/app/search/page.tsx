@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import SearchBar from '../components/SearchBar';
@@ -13,6 +13,21 @@ interface SearchResultItem {
   translation: string;
 }
 
+// Interface for Surah data from /surah endpoint
+interface ApiSurahInfo {
+  number: number;
+  name: string; // Arabic name
+  englishName: string;
+  // Add other fields if needed
+}
+
+// Interface for search match data from /search endpoint
+interface ApiSearchMatch {
+  surah: number;
+  ayah: number;
+  text: string; // This is the translation text in the search API
+}
+
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
@@ -21,59 +36,90 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (query) {
-      searchQuran(query);
-    }
-  }, [query]);
-
-  const searchQuran = async (searchQuery: string) => {
+  const searchQuran = useCallback(async (searchQuery: string) => {
+    if (!searchQuery) return; // Don't search if query is empty
     setLoading(true);
     setError('');
     setResults([]);
 
     try {
-      // First, get all surahs for mapping names
-      const surahsResponse = await fetch('https://api.alquran.cloud/v1/surah');
-      const surahsData = await surahsResponse.json();
-      const surahs = surahsData.data;
+      const quranCloudBaseUrl = process.env.NEXT_PUBLIC_QURAN_CLOUD_API_URL || 'https://api.alquran.cloud/v1';
 
-      // Search English translation for matches
-      const englishResponse = await fetch('https://api.alquran.cloud/v1/search/' + encodeURIComponent(searchQuery) + '/all/en.sahih');
-      const englishData = await englishResponse.json();
+      // 1. Fetch all Surah names
+      let surahMap: { [key: number]: string } = {};
+      try {
+        const surahsResponse = await fetch(`${quranCloudBaseUrl}/surah`);
+        const surahsData = await surahsResponse.json();
+        if (surahsData.code === 200 && surahsData.data) {
+          surahMap = surahsData.data.reduce((acc: { [key: number]: string }, surah: ApiSurahInfo) => {
+            acc[surah.number] = surah.englishName; // Using English name from API
+            return acc;
+          }, {});
+        }
+      } catch (err) {
+        console.error('Error fetching surahs:', err);
+        // Non-critical error, continue search without names if fetch fails
+      }
 
-      if (englishData.code === 200 && englishData.data.matches.length > 0) {
-        // Map results to include Arabic text
-        const searchResults = await Promise.all(
-          englishData.data.matches.map(async (match: any) => {
-            // Get the Arabic text for this verse
-            const ayahResponse = await fetch(`https://api.alquran.cloud/v1/ayah/${match.surah}:${match.ayah}`);
-            const ayahData = await ayahResponse.json();
-            
-            // Find surah name
-            const surahInfo = surahs.find((s: any) => s.number === match.surah);
-            
+      // 2. Fetch English search results
+      let initialSearchResults: { surah: number; ayah: number; translation: string }[] = [];
+      try {
+        const englishResponse = await fetch(`${quranCloudBaseUrl}/search/${encodeURIComponent(searchQuery)}/all/en.sahih`);
+        const englishData = await englishResponse.json();
+        if (englishData.code === 200 && englishData.data && englishData.data.matches) {
+          initialSearchResults = englishData.data.matches.map((match: ApiSearchMatch) => ({
+            surah: match.surah,
+            ayah: match.ayah,
+            translation: match.text,
+          }));
+        }
+      } catch (err) {
+        console.error('Error fetching search results:', err);
+        // Set error and stop if primary search fails
+        setError('Failed to fetch search results.');
+        setLoading(false);
+        return;
+      }
+
+      // 3. Fetch Arabic text for each matching Ayah
+      const resultsWithArabicPromises = initialSearchResults.map(async (match) => {
+        try {
+          const ayahResponse = await fetch(`${quranCloudBaseUrl}/ayah/${match.surah}:${match.ayah}`);
+          const ayahData = await ayahResponse.json();
+          if (ayahData.code === 200 && ayahData.data && ayahData.data.text) {
             return {
               surah: match.surah,
               ayah: match.ayah,
-              surahName: surahInfo ? surahInfo.englishName : `Surah ${match.surah}`,
-              text: ayahData.data.text,
-              translation: match.text,
+              surahName: surahMap[match.surah] || `Surah ${match.surah}`, // Use fetched name or default
+              text: ayahData.data.text, // Arabic text
+              translation: match.translation,
             };
-          })
-        );
-        
-        setResults(searchResults);
-      } else {
-        setResults([]);
-      }
+          }
+          return undefined; // Return undefined if fetch fails for this ayah
+        } catch (err) {
+          console.error(`Error fetching Arabic text for ${match.surah}:${match.ayah}:`, err);
+          return undefined; // Return undefined on error
+        }
+      });
+
+      const resolvedResults = await Promise.all(resultsWithArabicPromises);
+      // Filter out undefined results before setting state
+      const finalResults = resolvedResults.filter((result): result is SearchResultItem => result !== undefined);
+
+      setResults(finalResults);
     } catch (err) {
       console.error('Error searching Quran:', err);
-      setError('Could not complete the search at this time. Please try again later.');
+      setError('An unexpected error occurred during the search.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Empty dependency array for useCallback as it doesn't depend on component state/props
+
+  useEffect(() => {
+    if (query) {
+      searchQuran(query);
+    }
+  }, [query, searchQuran]); // Add searchQuran to dependencies
 
   // Function to highlight the search term in the text
   const highlightText = (text: string, term: string) => {

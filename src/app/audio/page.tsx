@@ -20,6 +20,10 @@ const recitersList: ReciterMp3Info[] = [
   { id: 'abdulbasit', audioApiId: 'Abdul_Basit_Murattal_192kbps', name: 'عبد الباسط عبد الصمد (مرتل)' }, // Murattal version
   { id: 'basfar', audioApiId: 'Abdullah_Basfar_192kbps', name: 'عبد الله بصفر' },
   { id: 'balushi', audioApiId: 'Hazza_Al-Balushi_128kbps', name: 'هزاع البلوشي' },
+  { id: 'sudais', audioApiId: 'Abdurrahmaan_As-Sudais_192kbps', name: 'عبد الرحمن السديس' },
+  { id: 'shuraim', audioApiId: 'Saood_Ash-Shuraym_128kbps', name: 'سعود الشريم' },
+  { id: 'ajmi', audioApiId: 'Ahmed_Neana_128kbps', name: 'أحمد نعينع' }, // Using Ahmed Neana as found on everyayah
+  { id: 'ghamdi', audioApiId: 'Saad_Al-Ghamdi_128kbps', name: 'سعد الغامدي' },
   // Add more reciters here with their corresponding audioApiId
 ];
 
@@ -38,10 +42,11 @@ export default function AudioDownloadPage() {
     setSelectedReciter(null);
   };
 
-  // Removed generateZipUrl as the feature is disabled for now
-  // const generateZipUrl = (reciterId: string): string => {
-  //     return `https://example.com/quran/zips/${reciterId}_full_quran.zip`;
-  // };
+  // Function to generate the full Quran ZIP download URL from everyayah.com
+  const generateZipUrl = (audioApiId: string): string => {
+      // Example: https://everyayah.com/data/Mishary_Rashed_Alafasy_128kbps/Mishary_Rashed_Alafasy_128kbps.zip
+      return `https://everyayah.com/data/${audioApiId}/${audioApiId}.zip`;
+  };
 
   return (
     <div className="min-h-screen p-6 md:p-10 bg-pattern">
@@ -53,7 +58,7 @@ export default function AudioDownloadPage() {
              className="flex items-center text-primary hover:text-accent transition-colors hover-lift font-medium text-sm"
              aria-label="العودة إلى فهرس السور"
            >
-             <svg xmlns="http://www.w3.org/2000/svg" className="mr-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+             <svg xmlns="http://www.w3.org/2000/svg" className="mr-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
              العودة إلى الرئيسية
            </Link>
         </nav>
@@ -73,7 +78,7 @@ export default function AudioDownloadPage() {
         <main>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-fr"> {/* Use auto-rows-fr for equal height */}
                 {recitersList.map((reciter) => {
-                    // const fullQuranZipUrl = generateZipUrl(reciter.id);
+                    const fullQuranZipUrl = generateZipUrl(reciter.audioApiId);
                     return (
                         <div key={reciter.id} className="quran-card p-5 flex flex-col text-center scale-in h-full"> {/* Added h-full */}
                             <div className="flex-grow"> {/* Wrapper to push buttons down */}
@@ -89,19 +94,21 @@ export default function AudioDownloadPage() {
                                     className="button-outline text-sm px-4 py-2 flex items-center justify-center gap-1.5 w-full"
                                     aria-label={`استعراض سور القارئ ${reciter.name}`}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2 0-4.5 1-6 3.5V6.5C7.5 5 10 4 12 4s4.5 1 6 2.5V15c-1.5-2.5-4-3.5-6-3.5zM6 18.5c1.5-2.5 4-3.5 6-3.5s4.5 1 6 3.5"/><path d="M12 4v15"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12c-2 0-4.5 1-6 3.5V6.5C7.5 5 10 4 12 4s4.5 1 6 2.5V15c-1.5-2.5-4-3.5-6-3.5zM6 18.5c1.5-2.5 4-3.5 6-3.5s4.5 1 6 3.5"/><path d="M12 4v15"/></svg>
                                     استماع / تحميل السور
                                 </button>
-                                 {/* Disabled Button for Full Quran ZIP */}
-                                <button
-                                    disabled
-                                    className="button text-sm px-4 py-2 flex items-center justify-center gap-1.5 w-full disabled:opacity-50 disabled:cursor-not-allowed relative"
-                                    aria-label={`تحميل المصحف كاملاً بصوت ${reciter.name} (قيد التطوير)`}
+                                 {/* Changed to <a> tag and enabled */}
+                                <a
+                                    href={fullQuranZipUrl}
+                                    download
+                                    target="_blank" // Optional: Open download link in new tab
+                                    rel="noopener noreferrer"
+                                    className="button text-sm px-4 py-2 flex items-center justify-center gap-1.5 w-full"
+                                    aria-label={`تحميل المصحف كاملاً بصوت ${reciter.name}`}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                                     تحميل المصحف كاملاً (ZIP)
-                                    <span className="absolute -top-2 -right-1 bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">قيد التطوير</span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     );
