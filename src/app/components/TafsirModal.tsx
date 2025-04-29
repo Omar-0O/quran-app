@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 interface TafsirModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export default function TafsirModal({
 }: TafsirModalProps) {
   const [tafsir, setTafsir] = useState<TafsirData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!surahNumber || !ayahNumber) return;

@@ -53,11 +53,7 @@ export default function AudioPlayer({ surahNumber, ayahNumber, reciter = DEFAULT
         // Attempt to play
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
-<<<<<<< HEAD
           playPromise.then(() => {
-=======
-          playPromise.then(_ => {
->>>>>>> 109efb0 (Initial commit)
             // Autoplay started!
             setIsLoading(false);
           }).catch(error => {
