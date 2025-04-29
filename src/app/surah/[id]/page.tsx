@@ -1,5 +1,3 @@
- // this is tha surah page 
- // surah\[id]\page.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -216,32 +214,38 @@ export default function SurahPage() {
 
   const handleToggleFullSurahPlay = async () => {
     if (!audioRef.current) return;
-    setAudioError(''); // مسح الأخطاء السابقة عند محاولة التشغيل
+    setAudioError(''); // Clear previous errors on interaction
 
     if (isSurahPlaying) {
+      // If currently playing, pause the audio
       audioRef.current.pause();
       setIsSurahPlaying(false);
     } else {
+      // If currently paused or stopped, try to play
       if (!currentAudioUrl) {
-          // رسالة خطأ عربية
+          // Set Arabic error message
           setAudioError('رابط الصوت غير متوفر. يرجى الانتظار أو اختيار قارئ آخر.');
           return;
       }
-      setIsAudioLoading(true);
+
+      // Ensure the correct audio source is loaded
+      if (audioRef.current.src !== currentAudioUrl) {
+          audioRef.current.src = currentAudioUrl;
+          audioRef.current.load(); // Load the new source
+      }
+
+      setIsAudioLoading(true); // Show loading indicator
       try {
-          // التأكد من أن المصدر هو الصحيح قبل التشغيل
-          if(audioRef.current.src !== currentAudioUrl) {
-              audioRef.current.src = currentAudioUrl;
-              audioRef.current.load(); // قد تحتاج استدعاء load إذا غيرت المصدر
-          }
+          // Attempt to play the audio
           await audioRef.current.play();
-          setIsSurahPlaying(true);
+          // The 'playing' event listener will set loading to false
+          setIsSurahPlaying(true); // Update state to playing
       } catch (err) {
           console.error("خطأ في تشغيل الصوت:", err);
-          // رسالة خطأ عربية
+           // Set Arabic error message
           setAudioError('لم يتمكن المتصفح من تشغيل الملف الصوتي.');
-          setIsAudioLoading(false);
-          setIsSurahPlaying(false);
+          setIsAudioLoading(false); // Hide loading on error
+          setIsSurahPlaying(false); // Reset playing state on error
       }
     }
   };
@@ -341,9 +345,9 @@ export default function SurahPage() {
         {/* بطاقة عنوان السورة */}
         <header className="mb-8 quran-card p-6 scale-in">
            <div className="text-center mb-4">
-             {/* عرض اسم السورة العربي فقط */}
-             <h1 className="text-3xl font-bold font-quran text-primary mb-1">سورة {surah.name}</h1>
-             {/* <p className="text-lg font-medium text-foreground/90 mb-2">{surah.englishName} ({surah.englishNameTranslation})</p> */} {/* إزالة الاسم الإنجليزي والترجمة */}
+             {/* عرض اسم السورة العربي فقط - إزالة "سورة " المكررة */}
+             <h1 className="text-3xl font-bold font-quran text-primary mb-1">{surah.name}</h1>
+             {/* <p className="text-lg font-medium text-foreground/90 mb-2">{surah.englishName} ({surah.englishNameTranslation})</p> */}
              <div className="text-sm text-foreground/70 flex items-center justify-center gap-4">
                {/* عرض عدد الآيات بالعربية */}
                <span>{surah.numberOfAyahs.toLocaleString('ar-EG')} آيات</span>
@@ -402,7 +406,7 @@ export default function SurahPage() {
                   rel="noopener noreferrer" // لأسباب أمنية عند استخدام target="_blank"
                  >
                    {/* أيقونة تحميل */}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>
                    <span className="font-medium text-sm">تحميل</span> {/* نص زر التحميل بالعربية */}
                </a>
 
@@ -433,9 +437,9 @@ export default function SurahPage() {
             let ayahTextToRender = ayah.text;
             const bismillahPrefix = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
 
-            // إزالة البسملة من بداية الآية الأولى في السور (عدا الفاتحة) لأننا نعرضها منفصلة أعلاه
+            // إزالة البسملة من بداية الآية الأولى في السور (عدا الفاتحة والتوبة) لأننا نعرضها منفصلة أعلاه
             // لا نزيلها من أي آية أخرى قد تبدأ بها (غير شائع)
-            if (surah.number !== 1 && ayah.numberInSurah === 1 && ayahTextToRender.startsWith(bismillahPrefix)) {
+            if (surah.number !== 1 && surah.number !== 9 && ayah.numberInSurah === 1 && ayahTextToRender.startsWith(bismillahPrefix)) {
                 ayahTextToRender = ayahTextToRender.substring(bismillahPrefix.length).trimStart();
             }
 

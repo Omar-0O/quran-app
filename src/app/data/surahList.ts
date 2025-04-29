@@ -91,7 +91,7 @@ export const surahList: SurahInfoBasic[] = [
   { number: 81, name: 'التكوير', englishName: 'At-Takwir', revelationType: 'Meccan', numberOfAyahs: 29 },
   { number: 82, name: 'الإنفطار', englishName: 'Al-Infitar', revelationType: 'Meccan', numberOfAyahs: 19 },
   { number: 83, name: 'المطففين', englishName: 'Al-Mutaffifin', revelationType: 'Meccan', numberOfAyahs: 36 },
-  { number: 84, name: 'الإنشقاق', englismhName: 'Al-Inshiqaq', revelationType: 'Meccan', numberOfAyahs: 25 },
+  { number: 84, name: 'الإنشقاق', englishName: 'Al-Inshiqaq', revelationType: 'Meccan', numberOfAyahs: 25 },
   { number: 85, name: 'البروج', englishName: 'Al-Buruj', revelationType: 'Meccan', numberOfAyahs: 22 },
   { number: 86, name: 'الطارق', englishName: 'At-Tariq', revelationType: 'Meccan', numberOfAyahs: 17 },
   { number: 87, name: 'الأعلى', englishName: 'Al-A\'la', revelationType: 'Meccan', numberOfAyahs: 19 },
