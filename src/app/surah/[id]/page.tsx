@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { useParams, useSearchParams } from 'next/navigation';
+import { Maximize, Minimize } from 'lucide-react'; // Import icons
 
 // Interface for Surah data structure from API (الحفاظ على بنية البيانات الإنجليزية للتوافق مع الواجهة البرمجية)
 interface SurahData {
@@ -58,6 +59,9 @@ export default function SurahPage() {
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
+
+  // --- Fullscreen State --- 
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // مراجع للتمرير وتسليط الضوء
   const ayahRefs = useRef<{ [key: number]: HTMLSpanElement | null }>({});
@@ -200,6 +204,26 @@ export default function SurahPage() {
     }
   }, [highlightedAyahParam, loading, surah]); // Dependencies
 
+  // --- Fullscreen Change Listener --- 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    // Add vendor prefixes for compatibility if needed
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
+
   // --- معالجات الصوت ---
 
   const handleFullSurahEnded = () => setIsSurahPlaying(false);
@@ -274,6 +298,35 @@ export default function SurahPage() {
    // دالة لربط مرجع الآية
    const setAyahRef = (ayahNumber: number) => (el: HTMLSpanElement | null) => {
     ayahRefs.current[ayahNumber] = el;
+  };
+
+  // --- Fullscreen Toggle Handler ---
+  const toggleFullscreen = async () => {
+    const elem = surahContentRef.current;
+    if (!elem) return;
+
+    if (!document.fullscreenElement) {
+      try {
+        // Attempt to enter fullscreen
+        await elem.requestFullscreen();
+        setIsFullscreen(true);
+      } catch (err: unknown) {
+        console.error('خطأ في دخول وضع ملء الشاشة:', err);
+        const message = err instanceof Error ? err.message : 'لم يتمكن المتصفح من الدخول لوضع ملء الشاشة.';
+        // Optionally show error to user, maybe via audioError state?
+        setAudioError(message);
+      }
+    } else {
+      try {
+        // Attempt to exit fullscreen
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      } catch (err: unknown) { 
+        console.error('خطأ في الخروج من وضع ملء الشاشة:', err);
+        const message = err instanceof Error ? err.message : 'لم يتمكن المتصفح من الخروج من وضع ملء الشاشة.';
+        setAudioError(message);
+      }
+    }
   };
 
   // --- منطق العرض (Render Logic) ---
@@ -416,6 +469,21 @@ export default function SurahPage() {
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>
                    <span className="font-medium text-sm">تحميل</span> {/* نص زر التحميل بالعربية */}
                </a>
+
+           {/* Fullscreen Toggle Button */}
+            <button
+                onClick={toggleFullscreen}
+                className="button-outline flex items-center gap-2 min-w-[100px] justify-center transition-colors duration-200"
+                aria-label={isFullscreen ? 'الخروج من وضع ملء الشاشة' : 'الدخول في وضع ملء الشاشة'}
+                title={isFullscreen ? 'الخروج من وضع ملء الشاشة' : 'الدخول في وضع ملء الشاشة'}
+            >
+                {isFullscreen ? (
+                    <Minimize size={18} />
+                ) : (
+                    <Maximize size={18} />
+                )}
+                <span className="font-medium text-sm">{isFullscreen ? 'تصغير' : 'تكبير'}</span>
+            </button>
 
          </div>
            {/* عرض أخطاء الصوت */}
