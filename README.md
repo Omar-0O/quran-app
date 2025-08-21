@@ -5,7 +5,7 @@
 
 A modern, fast, and beautiful web application to read, listen to, and download verses from the Holy Quran. Built with Next.js, React, and powered by the [Every Ayah API](https://everyayah.com).
 
-**[🚀 Live Demo Link Here]** *(Optional: Replace with your deployment URL)*
+**[🚀 Live Demo Link Here]** *(https://quran-app-ocz7.vercel.app/)*
 
 ---
 
