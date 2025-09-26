@@ -43,11 +43,11 @@ A modern, fast, and beautiful web application to read, listen to, and download v
 
 1.  **Clone the repo:**
     ```bash
-    git clone https://github.com/[your-username]/[your-repo-name].git
+    git clone https://github.com/Omar-0O/quran-app.git
     ```
 2.  **Navigate to directory:**
     ```bash
-    cd [your-repo-name]
+    cd [quran-app]
     ```
 3.  **Install dependencies:**
     ```bash
