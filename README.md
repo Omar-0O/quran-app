@@ -87,8 +87,6 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 
 Distributed under the MIT License. See `LICENSE` file for more information.
 
-*(Make sure you have a LICENSE file in your repo containing the MIT License text)*
-
 ---
 
 Enjoy using Quran Online! ✨
