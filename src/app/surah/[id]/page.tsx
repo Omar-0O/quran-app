@@ -5,37 +5,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from 'next/navigation';
 import { Maximize, Minimize } from 'lucide-react'; // Import icons
 
-// Interface for Surah data structure from API (الحفاظ على بنية البيانات الإنجليزية للتوافق مع الواجهة البرمجية)
-interface SurahData {
-  number: number;
-  name: string; // الاسم العربي (جزء من بيانات الواجهة البرمجية)
-  englishName: string; // الإبقاء على الاسم الإنجليزي إن لزم الأمر داخليًا أو للعرض الاختياري
-  englishNameTranslation: string; // الإبقاء على ترجمة الاسم الإنجليزية إن لزم الأمر داخليًا أو للعرض الاختياري
-  revelationType: string; // نوع النزول (Meccan/Medinan) - سيُترجم عند العرض
-  numberOfAyahs: number;
-  ayahs: Array<{
-    number: number;
-    numberInSurah: number;
-    text: string; // نص الآية باللغة العربية
-  }>;
-}
-
-// خيارات القراء مع معرفاتهم الرقمية من واجهة Quran.com API v4
-interface Reciter {
-  id: number;
-  name: string; // أسماء القراء باللغة العربية
-}
-
-const RECITERS: Reciter[] = [
-  { id: 2, name: 'محمود خليل الحصري' },
-  { id: 7, name: 'مشاري بن راشد العفاسي' },
-  { id: 1, name: 'عبد الباسط عبد الصمد (مرتل)' },
-  { id: 4, name: 'عبد الله بصفر' },
-  { id: 3, name: 'عبد الرحمن السديس' },
-  { id: 11, name: 'سعود الشريم' },
-  { id: 5, name: 'سعد الغامدي' },
-  // { id: ???, name: 'هزاع البلوشي' }, // يجب البحث عن المعرف الخاص بهزاع البلوشي في Quran.com API
-];
+import { SurahData, Reciter, RECITERS } from '../../data/constants';
 
 // دالة مساعدة لترجمة نوع النزول إلى العربية
 const getArabicRevelationType = (type: string): string => {

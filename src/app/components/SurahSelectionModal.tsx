@@ -6,7 +6,7 @@ import { SurahInfoBasic } from "../data/surahList"; // Import Surah type
 // Define structure for reciter data passed to modal
 interface ReciterMp3Info {
   id: string; // Simple identifier
-  audioApiId: string; // Actual ID for audio URLs
+  serverUrl: string; // Actual ID for audio URLs
   name: string;
   description?: string;
 }
@@ -14,15 +14,15 @@ interface ReciterMp3Info {
 interface SurahSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  reciter: ReciterMp3Info; // Now includes audioApiId
+  reciter: ReciterMp3Info; // Now includes serverUrl
   surahList: SurahInfoBasic[]; // Receive the list of Surahs
 }
 
-// Helper function to generate individual MP3 URLs using the audioApiId
-const generateActualUrl = (reciterAudioApiId: string, surahNum: number): string => {
+// Helper function to generate individual MP3 URLs using the serverUrl
+const generateActualUrl = (reciterServerUrl: string, surahNum: number): string => {
   const paddedSurah = surahNum.toString().padStart(3, '0');
-  // Use the actual audioApiId for the URL
-  return `https://everyayah.com/data/${reciterAudioApiId}/${paddedSurah}.mp3`;
+  // Use the actual serverUrl for the URL
+  return `${reciterServerUrl}/${paddedSurah}.mp3`;
 };
 
 export default function SurahSelectionModal({
@@ -85,14 +85,44 @@ export default function SurahSelectionModal({
   }, [filteredSurahs, selectedSurahs]);
 
   // Placeholder for downloading selected Surahs
-  const handleDownloadSelected = () => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadSelected = async () => {
     if (selectedSurahs.size === 0) return;
 
-    // In a real app, this would trigger a backend process or use a client-side ZIP library
-    console.log(`Request to download ${selectedSurahs.size} Surahs for reciter ${reciter.name} (${reciter.audioApiId}):`, Array.from(selectedSurahs).sort((a, b) => a - b));
-    alert(`طلب تحميل ${selectedSurahs.size} سورة للقارئ ${reciter.name}\n(لأغراض العرض، سيتم طباعة أرقام السور في الكونسول)`);
-    // Potentially close modal after action
-    // onClose();
+    setIsDownloading(true);
+    const surahsToDownload = Array.from(selectedSurahs).sort((a, b) => a - b);
+
+    try {
+      for (const surahNumber of surahsToDownload) {
+        const audioUrl = generateActualUrl(reciter.serverUrl, surahNumber);
+
+        // Fetch as blob to bypass cross-origin download attribute issues
+        const response = await fetch(audioUrl);
+        if (!response.ok) throw new Error(`Failed to fetch Surah ${surahNumber}`);
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `${reciter.name} - Surah ${surahNumber}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Clean up memory
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+
+        // Add a small delay between downloads to prevent browser freezing
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    } catch (error) {
+      console.error("Error during download:", error);
+      alert("حدث خطأ أثناء تحميل بعض السور. الرجاء المحاولة مرة أخرى.");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -148,11 +178,11 @@ export default function SurahSelectionModal({
                <button
                  onClick={handleDownloadSelected}
                  className="button-outline text-sm px-3 py-1.5 flex items-center gap-1.5 whitespace-nowrap"
-                 disabled={selectedSurahs.size === 0}
+                 disabled={selectedSurahs.size === 0 || isDownloading}
                  aria-label={`تحميل ${selectedSurahs.size} سورة مختارة`}
                >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                 تحميل المحدد ({selectedSurahs.size})
+                 {isDownloading ? 'جاري التحميل...' : `تحميل المحدد (${selectedSurahs.size})`}
                </button>
            </div>
          </div>
@@ -161,7 +191,7 @@ export default function SurahSelectionModal({
         <ul className="overflow-y-auto flex-grow p-5 space-y-2">
           {filteredSurahs.length > 0 ? (
              filteredSurahs.map((surah) => {
-              const audioUrl = generateActualUrl(reciter.audioApiId, surah.number);
+              const audioUrl = generateActualUrl(reciter.serverUrl, surah.number);
               const isChecked = selectedSurahs.has(surah.number);
               return (
                 <li key={surah.number} className="flex items-center justify-between p-3 rounded-md bg-background hover:bg-secondary/10 transition-colors border border-transparent hover:border-border-color">
