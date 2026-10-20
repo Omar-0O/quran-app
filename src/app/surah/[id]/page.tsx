@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import Link from "next/link";
 import { useParams, useSearchParams } from 'next/navigation';
 // SVG icon components (no external dependency)
@@ -70,8 +70,8 @@ function LoadingScreen() {
   );
 }
 
-// ---- المكوّن الرئيسي ----
-export default function SurahPage() {
+// ---- محتوى الصفحة الرئيسي ----
+function SurahPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const highlightedAyahParam = searchParams.get('ayah');
@@ -585,5 +585,14 @@ export default function SurahPage() {
 
       </div>
     </div>
+  );
+}
+
+// تصدير الصفحة الرئيسية مغلفة بـ Suspense لضمان توافق Next.js 15 و Vercel
+export default function SurahPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <SurahPageContent />
+    </Suspense>
   );
 }

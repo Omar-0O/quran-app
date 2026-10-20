@@ -6,7 +6,7 @@ import SurahSelectionModal from "../components/SurahSelectionModal";
 import { surahList } from "../data/surahList";
 
 // بنية بيانات القارئ
-export interface ReciterMp3Info {
+interface ReciterMp3Info {
   id: string;
   serverUrl: string;
   name: string;
