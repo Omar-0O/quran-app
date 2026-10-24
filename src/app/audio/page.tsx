@@ -84,7 +84,7 @@ export default function AudioDownloadPage() {
           <span className="inline-block px-3.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-3">
             المكتبة الصوتية الشاملة • MP3 مجاناً
           </span>
-          <h1 className="text-3xl md:text-5xl font-bold text-primary mb-3 font-quran">
+          <h1 className="text-2xl! md:text-4xl! font-bold text-primary mb-3!">
             تحميل واستماع القرآن الكريم
           </h1>
           <p className="text-base md:text-lg text-foreground/80 max-w-2xl mx-auto mb-6">
@@ -149,7 +149,7 @@ export default function AudioDownloadPage() {
                     </span>
                     <span className="text-xs text-foreground/50">تلاوات كاملة 114 سورة</span>
                   </div>
-                  <h2 className="text-2xl font-bold font-quran text-primary mt-1">
+                  <h2 className="text-xl! md:text-2xl! font-bold text-primary mt-1 mb-0!">
                     فضيلة الشيخ محمد صديق المنشاوي (رحمه الله)
                   </h2>
                 </div>
@@ -169,7 +169,7 @@ export default function AudioDownloadPage() {
                     <span className="text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-md inline-block mb-2">
                       {reciter.rewaya}
                     </span>
-                    <h3 className="text-base font-bold text-primary mb-1">
+                    <h3 className="text-base! font-bold text-primary mb-1!">
                       {reciter.name}
                     </h3>
                     <p className="text-xs text-foreground/70 mb-4 leading-relaxed">
@@ -193,7 +193,7 @@ export default function AudioDownloadPage() {
         {/* شبكة القراء الكاملة */}
         <main>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+            <h2 className="text-lg! font-bold text-primary flex items-center gap-2 mb-0!">
               <span>قائمة القراء والمصاحف الكاملة</span>
               <span className="text-xs font-normal text-foreground/50 bg-foreground/5 px-2 py-0.5 rounded-full">
                 {filteredReciters.length} قارئ ومصحف
@@ -211,7 +211,7 @@ export default function AudioDownloadPage() {
                   <span className="text-[10px] font-medium text-foreground/60 bg-foreground/5 px-2 py-0.5 rounded-full inline-block mb-2">
                     {reciter.rewaya}
                   </span>
-                  <h3 className="text-base font-bold text-primary mb-1">
+                  <h3 className="text-base! font-bold text-primary mb-1!">
                     {reciter.name}
                   </h3>
                   {reciter.subname && (

@@ -285,7 +285,7 @@ export default function SurahSelectionModal({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xl">🎙️</span>
-              <h2 id="surah-modal-title" className="text-lg md:text-xl font-bold font-quran text-primary">
+              <h2 id="surah-modal-title" className="text-lg! font-bold text-primary mb-0!">
                 {reciter.name}
               </h2>
             </div>
