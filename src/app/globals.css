@@ -2,6 +2,9 @@
 @import "tailwindcss";
 @import "./styles/animations.css"; /* Keep animations for now, can remove later if needed */
 
+/* dark: variant follows the .dark class set by ThemeContext */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* New Theme Variables (Arabic-First, Warm, Light) */
 :root {
   --background: #fdfbf6; /* Soft cream background */
@@ -28,46 +31,49 @@
   --radius-lg: 0.8rem;
 }
 
-/* Dark Mode Theme Variables */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a202c; /* Deep cool grey/blue */
-    --foreground: #e2e8f0; /* Light grey text */
-    --primary: #68d391; /* Brighter green for primary elements */
-    --primary-light: #48bb78; /* Darker shade of green */
-    --secondary: #a0aec0; /* Cool grey for secondary accents */
-    --accent: #f6ad55; /* Keep the warm orange accent */
-    --accent-rgb: 246, 173, 85;
-    --card-bg: #2d3748; /* Darker card background */
-    --border-color: #4a5568; /* Lighter border for contrast */
-    --tafsir-bg: #2a303b; /* Specific background for Tafsir (if re-added later) */
-    --scrollbar-track: #2d3748;
-    --scrollbar-thumb: #4a5568;
+/* Dark Mode Theme Variables (toggled by the .dark class on <html>) */
+:root.dark {
+  --background: #1a202c; /* Deep cool grey/blue */
+  --foreground: #e2e8f0; /* Light grey text */
+  --primary: #68d391; /* Brighter green for primary elements */
+  --primary-light: #48bb78; /* Darker shade of green */
+  --secondary: #a0aec0; /* Cool grey for secondary accents */
+  --accent: #f6ad55; /* Keep the warm orange accent */
+  --accent-rgb: 246, 173, 85;
+  --card-bg: #2d3748; /* Darker card background */
+  --border-color: #4a5568; /* Lighter border for contrast */
+  --tafsir-bg: #2a303b;
+  --scrollbar-track: #2d3748;
+  --scrollbar-thumb: #4a5568;
 
-    /* Dark mode specific shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 
-  /* Adjustments for specific elements in dark mode */
-  .quran-card {
-      border-color: var(--border-color);
-  }
+.dark .quran-card {
+  border-color: var(--border-color);
+}
 
-   .bismillah {
-     color: var(--accent); /* Ensure Bismillah uses accent color */
-   }
+.dark .bismillah {
+  color: var(--accent);
+}
 
-   .verse-number-decorator {
-     color: var(--primary-light); /* Use lighter green for verse numbers */
-   }
+.dark .verse-number-decorator {
+  color: var(--primary-light);
+}
 
-   .ayah-highlight {
-     background-color: rgba(var(--accent-rgb), 0.25); /* Slightly stronger highlight */
-   }
+.dark .ayah-highlight {
+  background-color: rgba(var(--accent-rgb), 0.25);
 }
 
 @theme inline {
+  /* Make bg-primary / text-accent / border-border-color / bg-card-bg ... real utilities */
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-card-bg: var(--card-bg);
+  --color-border-color: var(--border-color);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /* Use the new font variables */
@@ -119,14 +125,16 @@ h1 { font-size: 2.25rem; font-weight: 600; }
   .font-quran, .font-arabic { font-size: 2.5rem; line-height: 2.9; }
 }
 
-/* Link Styles */
-a {
-  color: var(--accent);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-a:hover {
-  color: var(--primary);
+/* Link Styles (layered so utility classes like text-primary can override) */
+@layer base {
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  a:hover {
+    color: var(--primary);
+  }
 }
 
 /* Basic Card Style */
@@ -144,7 +152,8 @@ a:hover {
   border-color: var(--primary-light);
 }
 
-/* Button Styles (Simple, Clear) */
+/* Button Styles (Simple, Clear) - layered so utility classes can override */
+@layer components {
 button, .button {
   font-family: var(--font-ui);
   background-color: var(--primary);
@@ -180,6 +189,7 @@ button:disabled, .button:disabled {
   background-color: var(--primary-light);
   color: white;
   border-color: var(--primary-light);
+}
 }
 
 /* Icon Button Style (for Audio, Tafsir etc) */
@@ -316,127 +326,3 @@ button:disabled, .button:disabled {
   -webkit-box-decoration-break: clone;
   transition: background-color 0.3s ease-out; /* Smooth transition */
 }
-
-/* ========================================================
-   أوضاع راحة العين (Eye Comfort Reading Modes)
-   ======================================================== */
-.reading-theme-sepia {
-  --reader-bg: #f7f2e5;
-  --reader-card: #fdfaf3;
-  --reader-text: #2c221a;
-  --reader-border: #dcd0b8;
-  --reader-accent: #a0683a;
-  --reader-verse: #8c5b32;
-  --reader-frame: #bda886;
-  background-color: var(--reader-bg) !important;
-  color: var(--reader-text) !important;
-}
-
-.reading-theme-night {
-  --reader-bg: #12161b;
-  --reader-card: #192027;
-  --reader-text: #e6e2d8;
-  --reader-border: #2c3846;
-  --reader-accent: #e2b357;
-  --reader-verse: #d4a745;
-  --reader-frame: #405264;
-  background-color: var(--reader-bg) !important;
-  color: var(--reader-text) !important;
-}
-
-.reading-theme-emerald {
-  --reader-bg: #edf4ef;
-  --reader-card: #f6fbf7;
-  --reader-text: #172d1f;
-  --reader-border: #c4dccb;
-  --reader-accent: #2c774b;
-  --reader-verse: #2e7d50;
-  --reader-frame: #8fb89c;
-  background-color: var(--reader-bg) !important;
-  color: var(--reader-text) !important;
-}
-
-.reading-theme-light {
-  --reader-bg: #f8fafc;
-  --reader-card: #ffffff;
-  --reader-text: #1e293b;
-  --reader-border: #e2e8f0;
-  --reader-accent: #3b82f6;
-  --reader-verse: #5d7a6a;
-  --reader-frame: #cbd5e1;
-  background-color: var(--reader-bg) !important;
-  color: var(--reader-text) !important;
-}
-
-/* ========================================================
-   إطار المصحف الشريف الحقيقي (Authentic Mushaf Frame)
-   ======================================================== */
-.mushaf-page-container {
-  background-color: var(--reader-card, #ffffff);
-  color: var(--reader-text, #3a2e28);
-  border: 1px solid var(--reader-border, #e8e1d2);
-  border-radius: 1.25rem;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.mushaf-inner-frame {
-  border: 2px solid var(--reader-frame, #a08c6d);
-  outline: 1px solid var(--reader-border, #e8e1d2);
-  outline-offset: 4px;
-  border-radius: 0.75rem;
-  padding: 1.5rem 1.25rem;
-  position: relative;
-}
-
-@media (min-width: 768px) {
-  .mushaf-inner-frame {
-    padding: 2.5rem 3rem;
-    border-width: 3px;
-    outline-width: 2px;
-    outline-offset: 6px;
-  }
-}
-
-/* ترويسة اسم السورة بالمصحف (Surah Banner) */
-.mushaf-surah-header-banner {
-  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.08) 0%, rgba(var(--accent-rgb), 0.16) 50%, rgba(var(--accent-rgb), 0.08) 100%);
-  border: 2px solid var(--reader-frame, var(--primary));
-  border-radius: 9999px;
-  padding: 0.6rem 1.5rem;
-  margin: 1.5rem auto 2rem auto;
-  max-width: 32rem;
-  text-align: center;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-/* آيات القرآن في النمط المتدفق ومصحف الصفحات */
-.ayah-segment {
-  cursor: pointer;
-  border-radius: 0.35rem;
-  padding: 0.15rem 0.2rem;
-  transition: background-color 0.2s ease;
-  display: inline;
-}
-
-.ayah-segment:hover {
-  background-color: rgba(var(--accent-rgb), 0.12);
-}
-
-.ayah-segment.active-playing {
-  background-color: rgba(var(--accent-rgb), 0.25);
-  box-shadow: 0 0 0 2px var(--reader-accent, var(--accent));
-}
-
-.mushaf-verse-badge {
-  color: var(--reader-verse, var(--primary));
-  font-family: var(--font-quran), 'Amiri', serif;
-  font-weight: bold;
-  font-size: 0.85em;
-  padding: 0 0.35rem;
-  display: inline-block;
-  user-select: none;
-}
- 
