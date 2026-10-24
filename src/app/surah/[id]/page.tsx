@@ -19,48 +19,52 @@ import {
   saveLastVisitedPage,
 } from '../../data/quranCache';
 import TafsirModal from '../../components/TafsirModal';
-import '../../styles/reader.css';
 
-/* ---------- Small inline icons ---------- */
-type IconProps = { size?: number };
-const Svg = ({ size = 20, children }: IconProps & { children: React.ReactNode }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {children}
+/* ---------- SVG Icons ---------- */
+const IconMaximize = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
   </svg>
 );
-const IconBack = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
-const IconNext = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
-const IconSettings = () => (
-  <Svg>
-    <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
-    <circle cx="16" cy="7" r="2" />
-    <circle cx="8" cy="17" r="2" />
-  </Svg>
+const IconMinimize = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+  </svg>
 );
-const IconPlay = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>;
-const IconPause = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>;
-const IconDownload = () => <Svg size={18}><path d="M12 3v12" /><path d="m7 11 5 5 5-5" /><path d="M5 21h14" /></Svg>;
-const IconExpand = () => <Svg><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" /></Svg>;
-const IconShrink = () => <Svg><path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M21 8h-3a2 2 0 0 1-2-2V3" /><path d="M3 16h3a2 2 0 0 1 2 2v3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" /></Svg>;
+const IconBookOpen = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  </svg>
+);
+const IconAlignJustify = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+);
+const IconChevronRight = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="9 18 15 12 9 6"/>
+  </svg>
+);
+const IconChevronLeft = ({ size = 18 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+);
 
-/* ---------- Helpers ---------- */
-const JUZ_NAMES = [
-  '', 'الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر',
-  'الحادي عشر', 'الثاني عشر', 'الثالث عشر', 'الرابع عشر', 'الخامس عشر', 'السادس عشر', 'السابع عشر',
-  'الثامن عشر', 'التاسع عشر', 'العشرون', 'الحادي والعشرون', 'الثاني والعشرون', 'الثالث والعشرون',
-  'الرابع والعشرون', 'الخامس والعشرون', 'السادس والعشرون', 'السابع والعشرون', 'الثامن والعشرون',
-  'التاسع والعشرون', 'الثلاثون',
-];
-
-const getArabicRevelationType = (type: string) => (type === 'Meccan' ? 'مكية' : 'مدنية');
+const getArabicRevelationType = (type: string): string => (type === 'Meccan' ? 'مكية' : 'مدنية');
 const toAr = (n: number) => n.toLocaleString('ar-EG');
 
-// Strip the Bismillah that the API prepends to the first ayah (diacritics-insensitive)
+// عدد الآيات في كل صفحة في وضع الصفحات الأصلي
+const AYAHS_PER_PAGE = 15;
+
+// Strip diacritics for clean Bismillah check
 const normalizeArabic = (s: string) =>
   s
     .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
     .replace(/\u0671/g, '\u0627')
     .replace(/\u06CC/g, '\u064A');
+
 const stripBismillah = (text: string) => {
   const words = text.trim().split(/\s+/);
   if (words.length > 4 && normalizeArabic(words.slice(0, 4).join(' ')) === 'بسم الله الرحمن الرحيم') {
@@ -69,143 +73,129 @@ const stripBismillah = (text: string) => {
   return text;
 };
 
-type ReaderTheme = 'auto' | 'white' | 'paper' | 'green' | 'night';
-type ReadingMode = 'scroll' | 'page';
-type QuranFont = 'amiri' | 'naskh';
-type LineSpacing = 'tight' | 'normal' | 'loose';
-
-const LINE_HEIGHTS: Record<LineSpacing, number> = { tight: 1.9, normal: 2.3, loose: 2.8 };
-const STORAGE_KEY = 'qr_reader_prefs_v2';
-
-const THEME_SWATCHES: { id: ReaderTheme; label: string; bg: string }[] = [
-  { id: 'auto', label: 'تلقائي', bg: 'linear-gradient(135deg,#fdfbf6 50%,#1a202c 50%)' },
-  { id: 'white', label: 'أبيض', bg: '#ffffff' },
-  { id: 'paper', label: 'ورقي', bg: '#f6efdf' },
-  { id: 'green', label: 'أخضر', bg: '#e8f0e8' },
-  { id: 'night', label: 'ليلي', bg: '#101417' },
-];
-
-/* ---------- Loading ---------- */
+/* ---------- شاشة التحميل الأصلية الفاخرة ---------- */
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center" dir="rtl">
-      <div className="text-center space-y-4">
-        <div className="relative mx-auto w-16 h-16">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-pattern" dir="rtl">
+      <div className="text-center space-y-6">
+        <div className="relative mx-auto w-20 h-20">
           <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping" />
-          <div className="absolute inset-1 rounded-full border-4 border-t-primary border-r-primary border-b-transparent border-l-transparent animate-spin" />
+          <div className="absolute inset-2 rounded-full border-4 border-t-primary border-r-primary border-b-transparent border-l-transparent animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" className="w-10 h-10 text-primary" fill="currentColor">
+              <path d="M8 8h48v48H8z" fill="none" stroke="currentColor" strokeWidth="3" rx="4" />
+              <path d="M16 20h32M16 28h32M16 36h24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M32 8v8M32 48v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </div>
         </div>
-        <p className="text-sm text-foreground/60 animate-pulse">جارٍ تحميل السورة...</p>
+
+        <div>
+          <p className="text-2xl font-quran text-primary font-semibold mb-1">بِسْمِ اللّٰهِ</p>
+          <p className="text-sm text-foreground/60 font-ui animate-pulse">جارٍ تحميل السورة...</p>
+        </div>
+
+        <div className="flex justify-center gap-1.5">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="w-1.5 rounded-full bg-primary"
+              style={{
+                height: '24px',
+                animation: `loadingBar 1.2s ease-in-out ${i * 0.15}s infinite`,
+              }}
+            />
+          ))}
+        </div>
       </div>
+
+      <style>{`
+        @keyframes loadingBar {
+          0%, 100% { transform: scaleY(0.4); opacity: 0.4; }
+          50% { transform: scaleY(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
 
-/* ---------- Page ---------- */
+/* ---------- محتوى الصفحة الرئيسي ---------- */
 function SurahPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const highlightedAyahParam = searchParams.get('ayah');
   const pageParam = searchParams.get('page');
-  const surahId = parseInt(params.id as string);
+  const surahId = parseInt(params.id as string, 10);
 
   // Synchronous cache retrieval – 0ms rendering if visited before or prefetched
-  const initialSurah = useMemo(() => getCachedSurah(surahId), [surahId]);
   const [surah, setSurah] = useState<SurahData | null>(() => getCachedSurah(surahId));
   const [loading, setLoading] = useState<boolean>(() => !getCachedSurah(surahId));
   const [fetchError, setFetchError] = useState('');
+  const [audioError, setAudioError] = useState('');
 
-  /* reader preferences */
-  const [theme, setTheme] = useState<ReaderTheme>('auto');
-  const [mode, setMode] = useState<ReadingMode>('scroll');
-  const [fontSize, setFontSize] = useState(26);
-  const [font, setFont] = useState<QuranFont>('amiri');
-  const [spacing, setSpacing] = useState<LineSpacing>('normal');
-  const [prefsLoaded, setPrefsLoaded] = useState(false);
+  // حالة الصوت - المنشاوي المرتل افتراضياً في الصدارة
+  const [selectedReciter, setSelectedReciter] = useState<ReciterInfo>(ALL_RECITERS[0]);
+  const [isSurahPlaying, setIsSurahPlaying] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const loadedAudioSrcRef = useRef<string>('');
 
-  /* ui state */
-  const [pageIndex, setPageIndex] = useState<number>(() => {
-    if (pageParam === 'last') return 0; // Will be set to pages.length - 1 once pages are computed
+  // ---- أسلوب القراءة: 'scroll' (متدفق) | 'page' (بشكل صفحات) ----
+  const [readingMode, setReadingMode] = useState<'scroll' | 'page'>('page');
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (pageParam === 'last') return 1; // updated after totalPages calculation
     if (pageParam) {
       const p = parseInt(pageParam, 10);
-      if (!isNaN(p) && p > 0) return p - 1;
+      if (!isNaN(p) && p > 0) return p;
     }
     const saved = getLastVisitedPage(surahId);
-    return saved != null ? saved : 0;
+    return saved != null ? saved + 1 : 1;
   });
-  const [sheet, setSheet] = useState<null | 'settings' | 'pages'>(null);
-  const [selectedAyah, setSelectedAyah] = useState<AyahData | null>(null);
-  const [tafsirAyah, setTafsirAyah] = useState<number | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const [scrollPct, setScrollPct] = useState(0);
 
-  /* audio */
-  const [reciter, setReciter] = useState<ReciterInfo>(ALL_RECITERS[0]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isAudioLoading, setIsAudioLoading] = useState(false);
-  const [audioError, setAudioError] = useState('');
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const loadedSrcRef = useRef('');
+  // ---- ملء الشاشة والتفسير ومراجع الآيات ----
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [tafsirAyahNumber, setTafsirAyahNumber] = useState<number | null>(null);
 
-  const [immersive, setImmersive] = useState(false);
-  const touchRef = useRef<{ x: number; y: number } | null>(null);
-  const jumpedRef = useRef(false);
+  const ayahRefs = useRef<{ [key: number]: HTMLSpanElement | null }>({});
+  const surahContentRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const initialPageSurahRef = useRef<number | null>(null);
 
   const prevSurah = surahId > 1 ? surahId - 1 : null;
   const nextSurah = surahId < 114 ? surahId + 1 : null;
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    window.setTimeout(() => setToast(null), 2500);
-  }, []);
+  // ---- حساب الصفحات ----
+  const totalPages = useMemo(() => {
+    if (!surah || !surah.ayahs) return 1;
+    return Math.max(1, Math.ceil(surah.ayahs.length / AYAHS_PER_PAGE));
+  }, [surah]);
 
-  /* ----- preferences: load once, save on change ----- */
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const p = JSON.parse(raw);
-        if (p.theme) setTheme(p.theme);
-        if (p.mode) setMode(p.mode);
-        if (p.fontSize) setFontSize(p.fontSize);
-        if (p.font) setFont(p.font);
-        if (p.spacing) setSpacing(p.spacing);
-        if (p.reciterId) {
-          const r = ALL_RECITERS.find((x) => x.id === p.reciterId);
-          if (r) setReciter(r);
-        }
-      }
-    } catch {
-      /* ignore */
-    }
-    setPrefsLoaded(true);
-  }, []);
+  const currentPageAyahs = useMemo(() => {
+    if (!surah || !surah.ayahs) return [];
+    const start = (currentPage - 1) * AYAHS_PER_PAGE;
+    return surah.ayahs.slice(start, start + AYAHS_PER_PAGE);
+  }, [surah, currentPage]);
 
-  useEffect(() => {
-    if (!prefsLoaded) return;
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ theme, mode, fontSize, font, spacing, reciterId: reciter.id })
-      );
-    } catch {
-      /* ignore */
-    }
-  }, [prefsLoaded, theme, mode, fontSize, font, spacing, reciter.id]);
+  // روابط الصوت والتحميل
+  const currentAudioUrl = useMemo(
+    () => getSurahAudioUrl(selectedReciter.serverUrl, surahId),
+    [selectedReciter, surahId]
+  );
+  const currentDownloadUrl = useMemo(
+    () => (surah ? getSurahDownloadUrl(selectedReciter.serverUrl, surahId, surah.name, selectedReciter.name) : '#'),
+    [selectedReciter, surahId, surah]
+  );
 
-  /* ----- fetch / cache surah ----- */
+  /* ----- جلب / كاش بيانات السورة ----- */
   useEffect(() => {
     let cancelled = false;
-    jumpedRef.current = false;
-    setSelectedAyah(null);
-
     const cached = getCachedSurah(surahId);
     if (cached) {
       setSurah(cached);
       setLoading(false);
       setFetchError('');
-      // Background prefetching of adjacent surahs so flipping is instant
       if (surahId > 1) prefetchSurah(surahId - 1);
       if (surahId < 114) prefetchSurah(surahId + 1);
       return;
@@ -225,7 +215,7 @@ function SurahPageContent() {
       })
       .catch((err) => {
         if (cancelled) return;
-        setFetchError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع.');
+        setFetchError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع أثناء تحميل السورة.');
         setLoading(false);
       });
 
@@ -234,31 +224,22 @@ function SurahPageContent() {
     };
   }, [surahId]);
 
-  /* ----- real mushaf pages ----- */
-  const pages = useMemo(() => {
-    if (!surah) return [];
-    const map = new Map<number, AyahData[]>();
-    surah.ayahs.forEach((a) => {
-      const p = a.page || 1;
-      if (!map.has(p)) map.set(p, []);
-      map.get(p)!.push(a);
-    });
-    return Array.from(map.keys())
-      .sort((a, b) => a - b)
-      .map((p) => ({ number: p, ayahs: map.get(p)!, juz: map.get(p)![0]?.juz || 1 }));
-  }, [surah]);
-
-  // Handle page positioning without resetting to 0 every time
+  /* ----- ضبط وتذكر الصفحة عند التغيير ----- */
   useEffect(() => {
-    if (!pages.length) return;
+    if (!surah || totalPages <= 0) return;
 
     if (highlightedAyahParam) {
+      const ayahNum = parseInt(highlightedAyahParam, 10);
+      if (!isNaN(ayahNum)) {
+        const pageOfAyah = Math.ceil(ayahNum / AYAHS_PER_PAGE);
+        setCurrentPage(Math.max(1, Math.min(totalPages, pageOfAyah)));
+      }
       initialPageSurahRef.current = surahId;
       return;
     }
 
     if (pageParam === 'last') {
-      setPageIndex(pages.length - 1);
+      setCurrentPage(totalPages);
       initialPageSurahRef.current = surahId;
       return;
     }
@@ -266,7 +247,7 @@ function SurahPageContent() {
     if (pageParam) {
       const p = parseInt(pageParam, 10);
       if (!isNaN(p) && p > 0) {
-        setPageIndex(Math.max(0, Math.min(pages.length - 1, p - 1)));
+        setCurrentPage(Math.max(1, Math.min(totalPages, p)));
         initialPageSurahRef.current = surahId;
         return;
       }
@@ -274,647 +255,597 @@ function SurahPageContent() {
 
     if (initialPageSurahRef.current !== surahId) {
       const saved = getLastVisitedPage(surahId);
-      if (saved != null && saved >= 0 && saved < pages.length) {
-        setPageIndex(saved);
+      if (saved != null && saved >= 0 && saved < totalPages) {
+        setCurrentPage(saved + 1);
       } else {
-        setPageIndex(0);
+        setCurrentPage(1);
       }
       initialPageSurahRef.current = surahId;
     }
-  }, [surahId, pages, pageParam, highlightedAyahParam]);
+  }, [surahId, surah, totalPages, pageParam, highlightedAyahParam]);
 
-  // Persist reading position for this surah
   useEffect(() => {
-    if (surah && pages.length > 0 && pageIndex >= 0 && pageIndex < pages.length) {
-      saveLastVisitedPage(surah.number, pageIndex);
+    if (surah && currentPage >= 1) {
+      saveLastVisitedPage(surah.number, currentPage - 1);
     }
-  }, [surah, pages.length, pageIndex]);
+  }, [surah, currentPage]);
 
-  const page = pages[pageIndex];
-  const isPageMode = mode === 'page' && !!page;
-  const isLastPage = pageIndex >= pages.length - 1;
-
-  /* ----- audio ----- */
-  const audioUrl = useMemo(() => getSurahAudioUrl(reciter.serverUrl, surahId), [reciter, surahId]);
-  const downloadUrl = useMemo(
-    () => (surah ? getSurahDownloadUrl(reciter.serverUrl, surahId, surah.name, reciter.name) : '#'),
-    [reciter, surahId, surah]
-  );
-
+  /* ----- إعداد مشغل الصوت ----- */
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'none';
-    const onEnded = () => setIsPlaying(false);
-    const onReady = () => setIsAudioLoading(false);
+
+    const onEnded = () => setIsSurahPlaying(false);
+    const onCanPlay = () => setIsAudioLoading(false);
+    const onPlaying = () => setIsAudioLoading(false);
     const onWaiting = () => setIsAudioLoading(true);
     const onError = () => {
-      setAudioError('تعذر تشغيل التلاوة حالياً. جرّب قارئاً آخر أو حمّلها مباشرة.');
+      setAudioError('تعذر تشغيل التلاوة. يمكنك تجربة قارئ آخر أو تحميل الملف مباشرة.');
       setIsAudioLoading(false);
-      setIsPlaying(false);
+      setIsSurahPlaying(false);
     };
+
     audio.addEventListener('ended', onEnded);
-    audio.addEventListener('canplay', onReady);
-    audio.addEventListener('playing', onReady);
+    audio.addEventListener('canplay', onCanPlay);
+    audio.addEventListener('playing', onPlaying);
     audio.addEventListener('waiting', onWaiting);
     audio.addEventListener('error', onError);
+
     audioRef.current = audio;
+
     return () => {
       audio.pause();
-      audio.removeAttribute('src');
+      audio.src = '';
       audio.removeEventListener('ended', onEnded);
-      audio.removeEventListener('canplay', onReady);
-      audio.removeEventListener('playing', onReady);
+      audio.removeEventListener('canplay', onCanPlay);
+      audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('waiting', onWaiting);
       audio.removeEventListener('error', onError);
     };
   }, []);
 
-  // surah / reciter changed -> stop and lazily reload on next play
+  // توقف الصوت عند تغيير السورة أو القارئ
   useEffect(() => {
-    audioRef.current?.pause();
-    loadedSrcRef.current = '';
-    setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      loadedAudioSrcRef.current = '';
+    }
+    setIsSurahPlaying(false);
     setIsAudioLoading(false);
     setAudioError('');
-  }, [audioUrl]);
+  }, [currentAudioUrl]);
 
-  const togglePlay = async () => {
+  const handleToggleFullSurahPlay = async () => {
     const audio = audioRef.current;
     if (!audio) return;
     setAudioError('');
-    if (isPlaying) {
+
+    if (isSurahPlaying) {
       audio.pause();
-      setIsPlaying(false);
+      setIsSurahPlaying(false);
       return;
     }
-    if (loadedSrcRef.current !== audioUrl) {
-      audio.src = audioUrl;
-      loadedSrcRef.current = audioUrl;
+
+    if (loadedAudioSrcRef.current !== currentAudioUrl) {
+      audio.src = currentAudioUrl;
+      loadedAudioSrcRef.current = currentAudioUrl;
     }
+
     setIsAudioLoading(true);
     try {
       await audio.play();
-      setIsPlaying(true);
+      setIsSurahPlaying(true);
     } catch {
-      setAudioError('تعذر تشغيل التلاوة. يمكنك تحميلها مباشرة من الإعدادات.');
+      setAudioError('لم يتمكن المتصفح من تشغيل التلاوة. جرّب قارئاً آخر أو استخدم زر التحميل.');
       setIsAudioLoading(false);
-      setIsPlaying(false);
+      setIsSurahPlaying(false);
     }
   };
 
-  /* ----- page navigation ----- */
-  const goToPage = useCallback(
-    (idx: number) => {
-      setPageIndex(Math.max(0, Math.min(pages.length - 1, idx)));
-      setSelectedAyah(null);
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    },
-    [pages.length]
-  );
+  /* ----- التمرير للآية المسلط عليها الضوء ----- */
+  useEffect(() => {
+    if (!highlightedAyahParam || loading || !surah) return;
+    const n = parseInt(highlightedAyahParam, 10);
+    const el = ayahRefs.current[n];
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ayah-highlight');
+        setTimeout(() => el.classList.remove('ayah-highlight'), 3000);
+      }, 300);
+    }
+  }, [highlightedAyahParam, loading, surah, currentPage, readingMode]);
 
-  // Next / previous page; at the edges move on to the neighbouring surah
-  const goNext = useCallback(() => {
-    if (pageIndex < pages.length - 1) {
-      goToPage(pageIndex + 1);
+  /* ----- ملء الشاشة ----- */
+  const toggleFullscreen = async () => {
+    const target = containerRef.current || document.documentElement;
+    if (!document.fullscreenElement) {
+      try {
+        await target.requestFullscreen?.();
+        setIsFullscreen(true);
+      } catch {
+        setIsFullscreen(true);
+      }
+    } else {
+      try {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      } catch {
+        setIsFullscreen(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  /* ----- التنقل بين الصفحات مع إمكانية التمرير بلمس الشاشة (Swipe) ----- */
+  const handleGoToPage = useCallback((p: number) => {
+    setCurrentPage(p);
+    surahContentRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    if (currentPage < totalPages) {
+      handleGoToPage(currentPage + 1);
     } else if (nextSurah) {
       if (nextSurah + 1 <= 114) prefetchSurah(nextSurah + 1);
       router.push(`/surah/${nextSurah}`);
     }
-  }, [pageIndex, pages.length, goToPage, nextSurah, router]);
+  }, [currentPage, totalPages, handleGoToPage, nextSurah, router]);
 
-  const goPrev = useCallback(() => {
-    if (pageIndex > 0) {
-      goToPage(pageIndex - 1);
+  const handlePrevPage = useCallback(() => {
+    if (currentPage > 1) {
+      handleGoToPage(currentPage - 1);
     } else if (prevSurah) {
       if (prevSurah - 1 >= 1) prefetchSurah(prevSurah - 1);
       router.push(`/surah/${prevSurah}?page=last`);
     }
-  }, [pageIndex, goToPage, prevSurah, router]);
+  }, [currentPage, handleGoToPage, prevSurah, router]);
 
-  /* ----- mode switching preserving position ----- */
-  const switchToScroll = useCallback(() => {
-    if (mode === 'scroll') return;
-    const currentFirstAyah = page?.ayahs[0]?.numberInSurah;
-    setMode('scroll');
-    if (currentFirstAyah) {
-      setTimeout(() => {
-        const el = document.getElementById(`ayah-${currentFirstAyah}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 60);
-    }
-  }, [mode, page]);
+  // إيماءات اللمس على الموبايل للتقليب السلس بالإصبع
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+  };
 
-  const switchToPage = useCallback(() => {
-    if (mode === 'page') return;
-    let target = pageIndex;
-    if (surah && pages.length > 0) {
-      const ayahEls = document.querySelectorAll('.rd-ayah');
-      let foundAyah: number | null = null;
-      for (let i = 0; i < ayahEls.length; i++) {
-        const rect = ayahEls[i].getBoundingClientRect();
-        if (rect.top >= 40 && rect.top <= window.innerHeight * 0.6) {
-          const num = parseInt(ayahEls[i].id.replace('ayah-', ''), 10);
-          if (!isNaN(num)) {
-            foundAyah = num;
-            break;
-          }
-        }
-      }
-      if (foundAyah != null) {
-        const idx = pages.findIndex((p) => p.ayahs.some((a) => a.numberInSurah === foundAyah));
-        if (idx !== -1) target = idx;
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      // عربي: السحب لليسار = الصفحة التالية، السحب لليمين = السابقة
+      if (dx < 0) {
+        handleNextPage();
+      } else {
+        handlePrevPage();
       }
     }
-    setMode('page');
-    setPageIndex(target);
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [mode, pageIndex, pages, surah]);
+  };
 
+  // لوحة المفاتيح
   useEffect(() => {
-    if (!isPageMode) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goNext();
-      if (e.key === 'ArrowRight') goPrev();
-      if (e.key === 'Escape') setImmersive(false);
+      if (readingMode !== 'page') return;
+      if (e.key === 'ArrowLeft') handleNextPage();
+      if (e.key === 'ArrowRight') handlePrevPage();
+      if (e.key === 'Escape' && isFullscreen) setIsFullscreen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isPageMode, goNext, goPrev]);
+  }, [readingMode, handleNextPage, handlePrevPage, isFullscreen]);
 
-  /* ----- immersive (full-screen) mode ----- */
-  const toggleImmersive = useCallback(async () => {
-    const next = !immersive;
-    setImmersive(next);
-    setSelectedAyah(null);
-    window.scrollTo({ top: 0 });
-    try {
-      if (next && !document.fullscreenElement) {
-        await document.documentElement.requestFullscreen?.();
-      } else if (!next && document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-    } catch {
-      /* browsers without the Fullscreen API (e.g. iPhone) use the CSS full-screen layout */
-    }
-    if (next) showToast('اضغط يمين الشاشة للسابقة ويسارها للتالية');
-  }, [immersive, showToast]);
-
-  // keep state in sync if the user leaves browser full screen by system gesture
-  useEffect(() => {
-    const onFs = () => {
-      if (!document.fullscreenElement) setImmersive(false);
-    };
-    document.addEventListener('fullscreenchange', onFs);
-    return () => document.removeEventListener('fullscreenchange', onFs);
-  }, []);
-
-  // leave immersive when switching to scroll mode
-  useEffect(() => {
-    if (mode !== 'page' && immersive) {
-      setImmersive(false);
-      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    }
-  }, [mode, immersive]);
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    if (!isPageMode) return;
-    const t = e.touches[0];
-    touchRef.current = { x: t.clientX, y: t.clientY };
-  };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    const start = touchRef.current;
-    touchRef.current = null;
-    if (!start || !isPageMode) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - start.x;
-    const dy = t.clientY - start.y;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      // Arabic book: swipe left = next page
-      if (dx < 0) goNext();
-      else goPrev();
-    }
-  };
-
-  /* ----- reading progress (scroll mode) ----- */
-  useEffect(() => {
-    if (isPageMode) return;
-    const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      setScrollPct(max > 0 ? Math.min(100, Math.max(0, (window.scrollY / max) * 100)) : 0);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [isPageMode, surah]);
-
-  /* ----- jump to ?ayah= ----- */
-  useEffect(() => {
-    if (!highlightedAyahParam || !surah || loading || !prefsLoaded || jumpedRef.current) return;
-    const n = parseInt(highlightedAyahParam);
-    if (mode === 'page') {
-      const idx = pages.findIndex((p) => p.ayahs.some((a) => a.numberInSurah === n));
-      if (idx !== -1 && idx !== pageIndex) {
-        setPageIndex(idx);
-        return;
+  // التبديل بين النمط المتدفق ونمط الصفحات مع الحفاظ على الموضع
+  const toggleReadingMode = () => {
+    if (readingMode === 'scroll') {
+      setReadingMode('page');
+      surahContentRef.current?.scrollTo({ top: 0 });
+    } else {
+      setReadingMode('scroll');
+      const firstAyahNum = currentPageAyahs[0]?.numberInSurah;
+      if (firstAyahNum) {
+        setTimeout(() => {
+          const el = ayahRefs.current[firstAyahNum];
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
       }
     }
-    jumpedRef.current = true;
-    window.setTimeout(() => {
-      const el = document.getElementById(`ayah-${n}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('is-flash');
-        window.setTimeout(() => el.classList.remove('is-flash'), 3000);
-      }
-    }, 250);
-  }, [highlightedAyahParam, surah, loading, prefsLoaded, mode, pages, pageIndex]);
-
-  /* ----- ayah actions ----- */
-  const copyAyah = async (a: AyahData) => {
-    if (!surah) return;
-    try {
-      await navigator.clipboard.writeText(`﴿${a.text}﴾ [سورة ${surah.name}: ${a.numberInSurah}]`);
-      showToast('تم نسخ الآية');
-    } catch {
-      showToast('تعذر النسخ');
-    }
-    setSelectedAyah(null);
-  };
-  const bookmarkAyah = (a: AyahData) => {
-    if (!surah) return;
-    try {
-      localStorage.setItem(
-        'last_read_quran',
-        JSON.stringify({ surahId: surah.number, surahName: surah.name, ayahNumber: a.numberInSurah })
-      );
-      showToast('تم حفظ علامة القراءة');
-    } catch {
-      /* ignore */
-    }
-    setSelectedAyah(null);
   };
 
-  /* ----- render helpers ----- */
+  const setAyahRef = (ayahNumber: number) => (el: HTMLSpanElement | null) => {
+    ayahRefs.current[ayahNumber] = el;
+  };
+
+  /* ----- دالة عرض الآية الكريمة ----- */
   const renderAyah = (ayah: AyahData) => {
-    let text = ayah.text.replace(/\n/g, ' ').trim();
+    let ayahTextToRender = ayah.text.replace(/\n/g, ' ').trim();
     if (surah && surah.number !== 1 && surah.number !== 9 && ayah.numberInSurah === 1) {
-      text = stripBismillah(text);
+      ayahTextToRender = stripBismillah(ayahTextToRender);
     }
-    const selected = selectedAyah?.numberInSurah === ayah.numberInSurah;
     return (
       <span
         key={ayah.number}
         id={`ayah-${ayah.numberInSurah}`}
-        className={`rd-ayah${selected ? ' is-selected' : ''}`}
-        onClick={() => setSelectedAyah(selected ? null : ayah)}
+        className="ayah-text-segment cursor-pointer hover:text-primary transition-colors inline"
+        onClick={() => setTafsirAyahNumber(ayah.numberInSurah)}
+        title={`آية ${toAr(ayah.numberInSurah)} - انقر لعرض التفسير`}
       >
-        {text}
-        <span className="rd-num">{' ﴿'}{toAr(ayah.numberInSurah)}{'﴾'}</span>
-        {ayah.sajda ? <span className="rd-num"> ۩</span> : null}{' '}
+        <span ref={setAyahRef(ayah.numberInSurah)} className="inline">
+          {ayahTextToRender}
+        </span>
+        <span className="verse-number-decorator font-sans select-none" aria-hidden="true">
+          {' '}﴿{toAr(ayah.numberInSurah)}﴾{' '}
+        </span>
       </span>
     );
   };
 
-  const showBismillah = (startsHere: boolean) =>
-    startsHere && !!surah && surah.number !== 1 && surah.number !== 9;
+  /* ----- أرقام أزرار الصفحات (بحد أقصى 7 أزرار مع نقاط ...) ----- */
+  const pageNumbers = useMemo(() => {
+    return Array.from({ length: totalPages }, (_, i) => i + 1)
+      .filter((p) => {
+        if (totalPages <= 7) return true;
+        if (p === 1 || p === totalPages) return true;
+        if (Math.abs(p - currentPage) <= 2) return true;
+        return false;
+      })
+      .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+        if (idx > 0 && typeof arr[idx - 1] === 'number' && (p as number) - (arr[idx - 1] as number) > 1) {
+          acc.push('...');
+        }
+        acc.push(p);
+        return acc;
+      }, []);
+  }, [totalPages, currentPage]);
 
-  /* ----- states ----- */
+  /* ----- حالة التحميل ----- */
   if (loading) return <LoadingScreen />;
 
+  /* ----- حالة الخطأ ----- */
   if (fetchError || !surah) {
     return (
-      <div className="min-h-screen p-4 flex items-center justify-center" dir="rtl">
-        <div className="quran-card p-8 text-center max-w-md">
-          <div className="text-4xl mb-3">⚠️</div>
-          <p className="font-bold mb-2 text-red-600">تعذّر تحميل السورة</p>
-          <p className="mb-5 text-sm text-foreground/70">{fetchError || 'حدث خطأ غير متوقع.'}</p>
-          <Link href="/" className="button">العودة إلى الفهرس</Link>
+      <div className="min-h-screen p-4 md:p-8 bg-pattern flex items-center justify-center" dir="rtl">
+        <div className="quran-card p-8 text-center fade-in max-w-md">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h1 className="text-xl font-bold mb-4 text-red-600">تعذّر تحميل السورة</h1>
+          <p className="mb-6 text-foreground/70">{fetchError || 'حدث خطأ غير متوقع.'}</p>
+          <Link href="/" className="button">
+            العودة إلى الفهرس
+          </Link>
         </div>
       </div>
     );
   }
 
-  const progress = isPageMode ? ((pageIndex + 1) / pages.length) * 100 : scrollPct;
-  const cssVars = {
-    '--rd-fs': `${fontSize}px`,
-    '--rd-lh': LINE_HEIGHTS[spacing],
-  } as React.CSSProperties;
-  const barClass = isPageMode && !immersive ? '' : ' no-bar';
-  const showChrome = !immersive;
-
   return (
     <div
-      className={`rd${immersive ? ' is-immersive' : ''}`}
+      ref={containerRef}
+      className={`min-h-screen p-4 md:p-8 bg-pattern ${isFullscreen ? 'fixed inset-0 z-50 overflow-y-auto bg-background p-4 sm:p-6' : ''}`}
       dir="rtl"
-      data-theme={immersive ? theme : undefined}
-      data-font={font}
-      style={cssVars}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
-      {/* Top bar */}
-      {showChrome && (<>
-      <header className="rd-topbar">
-        <Link href="/" className="rd-btn rd-ghost rd-icon" aria-label="العودة إلى الفهرس">
-          <IconBack />
-        </Link>
-
-        <div className="rd-topbar-title">
-          <h1 className="rd-title">سورة {surah.name}</h1>
-          <div className="rd-sub">
-            {toAr(surah.numberOfAyahs)} آية · {getArabicRevelationType(surah.revelationType)}
-          </div>
-        </div>
-
-        <button
-          className={`rd-btn rd-icon${isPlaying ? ' rd-primary' : ''}`}
-          onClick={togglePlay}
-          disabled={isAudioLoading && !isPlaying}
-          aria-label={isPlaying ? 'إيقاف التلاوة' : 'تشغيل التلاوة'}
-        >
-          {isAudioLoading ? <span className="rd-spin" style={{ borderColor: 'var(--rd-border)', borderTopColor: 'var(--rd-primary)' }} /> : isPlaying ? <IconPause /> : <IconPlay />}
-        </button>
-        {isPageMode && (
-          <button className="rd-btn rd-ghost rd-icon" onClick={toggleImmersive} aria-label="قراءة بملء الشاشة">
-            <IconExpand />
-          </button>
-        )}
-        <button className="rd-btn rd-ghost rd-icon" onClick={() => setSheet('settings')} aria-label="إعدادات القراءة">
-          <IconSettings />
-        </button>
-      </header>
-      <div className="rd-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
-      </>)}
-
-      {/* Full-screen reading: tap the screen edges to turn pages */}
-      {immersive && isPageMode && (
-        <>
-          <button className="rd-zone is-prev" onClick={goPrev} aria-label="الصفحة السابقة" />
-          <button className="rd-zone is-next" onClick={goNext} aria-label="الصفحة التالية" />
-          <div className="rd-hud-top">
-            <button className="rd-btn rd-icon" onClick={toggleImmersive} aria-label="الخروج من ملء الشاشة"><IconShrink /></button>
-            <button className="rd-btn rd-icon" onClick={() => setSheet('settings')} aria-label="إعدادات القراءة"><IconSettings /></button>
-          </div>
-          <div className="rd-hud-pill">{toAr(page.number)} · {toAr(pageIndex + 1)}/{toAr(pages.length)}</div>
-        </>
-      )}
-
-      {toast && <div className="rd-toast" role="status">{toast}</div>}
-
-      {/* Content */}
-      <main className={`rd-main${barClass}`}>
-        {audioError && <p className="rd-error" role="alert">{audioError}</p>}
-
-        {isPageMode ? (
-          <article className="rd-page" data-theme={theme} aria-label={`صفحة ${toAr(page.number)}`}>
-            <div className="rd-pagehead">
-              <span>سورة {surah.name}</span>
-              <span>الجزء {JUZ_NAMES[page.juz] || toAr(page.juz)}</span>
-            </div>
-
-            {page.ayahs.some((a) => a.numberInSurah === 1) && (
-              <div className="rd-banner">
-                سورة {surah.name}
-                <small>{toAr(surah.numberOfAyahs)} آية · {getArabicRevelationType(surah.revelationType)}</small>
-              </div>
-            )}
-            {showBismillah(page.ayahs.some((a) => a.numberInSurah === 1)) && (
-              <p className="rd-bismillah" style={{ fontSize: fontSize * 1.1 }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
-            )}
-
-            <div className="rd-text">{page.ayahs.map(renderAyah)}</div>
-
-            <div className="rd-pagefoot">
-              <span className="rd-pagenum">{toAr(page.number)}</span>
-            </div>
-          </article>
-        ) : (
-          <article className="rd-page" data-theme={theme}>
-            {surah.number !== 9 && (
-              <div className="rd-banner">
-                سورة {surah.name}
-                <small>{toAr(surah.numberOfAyahs)} آية · {getArabicRevelationType(surah.revelationType)}</small>
-              </div>
-            )}
-            {showBismillah(true) && (
-              <p className="rd-bismillah" style={{ fontSize: fontSize * 1.1 }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
-            )}
-            <div className="rd-text">{surah.ayahs.map(renderAyah)}</div>
-          </article>
-        )}
-
-        {/* Surah navigation at the end of the content (scroll mode, or the last page) */}
-        {(!isPageMode || (isLastPage && !immersive)) && (
-          <div className="rd-endnav">
+      <div className="max-w-5xl mx-auto fade-in">
+        {/* ---- شريط التنقل العلوي ---- */}
+        {!isFullscreen && (
+          <nav className="mb-8 flex justify-between items-center text-sm">
             {prevSurah ? (
               <Link
                 href={`/surah/${prevSurah}?page=last`}
-                className="rd-btn"
+                className="flex items-center text-primary hover:text-accent transition-colors hover-lift"
+                aria-label="السورة السابقة"
                 onMouseEnter={() => prefetchSurah(prevSurah)}
                 onTouchStart={() => prefetchSurah(prevSurah)}
               >
-                <IconBack /> السورة السابقة
+                <IconChevronRight size={18} />
+                <span className="me-1 font-medium">السابقة</span>
               </Link>
-            ) : <span />}
+            ) : (
+              <div aria-hidden="true" />
+            )}
+
+            <Link
+              href="/"
+              className="flex items-center text-primary hover:text-accent transition-colors hover-lift font-medium"
+              aria-label="الفهرس"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="me-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+              الفهرس
+            </Link>
+
             {nextSurah ? (
               <Link
                 href={`/surah/${nextSurah}`}
-                className="rd-btn rd-primary"
+                className="flex items-center text-primary hover:text-accent transition-colors hover-lift"
+                aria-label="السورة التالية"
                 onMouseEnter={() => prefetchSurah(nextSurah)}
                 onTouchStart={() => prefetchSurah(nextSurah)}
               >
-                السورة التالية <IconNext />
+                <span className="ms-1 font-medium">التالية</span>
+                <IconChevronLeft size={18} />
               </Link>
-            ) : <span />}
-          </div>
+            ) : (
+              <div aria-hidden="true" />
+            )}
+          </nav>
         )}
-      </main>
 
-      {/* Page mode bottom navigation */}
-      {isPageMode && !immersive && (
-        <nav className="rd-bottombar" aria-label="التنقل بين الصفحات">
-          {pageIndex > 0 ? (
-            <button className="rd-btn" onClick={() => goToPage(pageIndex - 1)} aria-label="الصفحة السابقة">
-              <IconBack /> السابقة
-            </button>
-          ) : prevSurah ? (
-            <Link
-              href={`/surah/${prevSurah}?page=last`}
-              className="rd-btn"
-              onMouseEnter={() => prefetchSurah(prevSurah)}
-              onTouchStart={() => prefetchSurah(prevSurah)}
-            >
-              <IconBack /> السورة السابقة
-            </Link>
-          ) : <span />}
-
-          <button className="rd-btn rd-pagejump" onClick={() => setSheet('pages')} aria-label="اختيار صفحة">
-            <span>صفحة {toAr(page.number)}</span>
-            <small>{toAr(pageIndex + 1)} من {toAr(pages.length)}</small>
-          </button>
-
-          {!isLastPage ? (
-            <button className="rd-btn rd-primary" onClick={() => goToPage(pageIndex + 1)} aria-label="الصفحة التالية">
-              التالية <IconNext />
-            </button>
-          ) : nextSurah ? (
-            <Link
-              href={`/surah/${nextSurah}`}
-              className="rd-btn rd-primary"
-              onMouseEnter={() => prefetchSurah(nextSurah)}
-              onTouchStart={() => prefetchSurah(nextSurah)}
-            >
-              السورة التالية <IconNext />
-            </Link>
-          ) : <span />}
-        </nav>
-      )}
-
-      {/* Selected ayah actions */}
-      {selectedAyah && (
-        <div className={`rd-actions${barClass}`} role="toolbar" aria-label="إجراءات الآية">
-          <span className="rd-label">آية {toAr(selectedAyah.numberInSurah)}</span>
-          <button className="rd-btn rd-primary" onClick={() => setTafsirAyah(selectedAyah.numberInSurah)}>التفسير</button>
-          <button className="rd-btn" onClick={() => copyAyah(selectedAyah)}>نسخ</button>
-          <button className="rd-btn" onClick={() => bookmarkAyah(selectedAyah)}>حفظ</button>
-          <button className="rd-btn rd-ghost rd-icon" onClick={() => setSelectedAyah(null)} aria-label="إغلاق">✕</button>
-        </div>
-      )}
-
-      {/* Settings sheet */}
-      {sheet === 'settings' && (
-        <div className="rd-overlay" onClick={() => setSheet(null)}>
-          <div className="rd-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="إعدادات القراءة">
-            <div className="rd-grab" />
-            <p className="rd-sheet-title">إعدادات القراءة</p>
-
-            <div className="rd-section">
-              <span className="rd-label-row">أسلوب القراءة</span>
-              <div className="rd-seg">
-                <button className={mode === 'scroll' ? 'is-on' : ''} onClick={switchToScroll}>
-                  متتابع
-                </button>
-                <button className={mode === 'page' ? 'is-on' : ''} onClick={switchToPage}>
-                  صفحات المصحف
-                </button>
-              </div>
+        {/* ---- بطاقة عنوان السورة والتحكم ---- */}
+        <header className="mb-8 quran-card p-6 scale-in">
+          <div className="text-center mb-4">
+            <h1 className="text-3xl font-bold font-quran text-primary mb-1">سورة {surah.name}</h1>
+            <div className="text-sm text-foreground/70 flex items-center justify-center gap-4">
+              <span>{toAr(surah.numberOfAyahs)} آيات</span>
+              <span className="flex items-center">
+                <span
+                  className={`revelation-indicator ms-1 ${
+                    surah.revelationType === 'Meccan' ? 'revelation-meccan' : 'revelation-medinan'
+                  }`}
+                  title={getArabicRevelationType(surah.revelationType)}
+                />
+                {getArabicRevelationType(surah.revelationType)}
+              </span>
             </div>
+          </div>
 
-            <div className="rd-section">
-              <span className="rd-label-row">لون الخلفية</span>
-              <div className="rd-swatches">
-                {THEME_SWATCHES.map((t) => (
-                  <button key={t.id} className={`rd-swatch${theme === t.id ? ' is-on' : ''}`} onClick={() => setTheme(t.id)}>
-                    <i style={{ background: t.bg }} />
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="rd-section">
-              <span className="rd-label-row">حجم الخط ({toAr(fontSize)})</span>
-              <input
-                className="rd-range"
-                type="range"
-                min={18}
-                max={44}
-                step={1}
-                value={fontSize}
-                onChange={(e) => setFontSize(parseInt(e.target.value, 10))}
-                aria-label="حجم الخط"
-              />
-              <div className="rd-preview" data-theme={theme} style={{ background: 'var(--rd-card)' }}>
-                <span className="rd-text" style={{ textAlignLast: 'center' }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span>
-              </div>
-            </div>
-
-            <div className="rd-section">
-              <span className="rd-label-row">نوع الخط</span>
-              <div className="rd-seg">
-                <button className={font === 'amiri' ? 'is-on' : ''} onClick={() => setFont('amiri')}>مصحفي</button>
-                <button className={font === 'naskh' ? 'is-on' : ''} onClick={() => setFont('naskh')}>نسخ واضح</button>
-              </div>
-            </div>
-
-            <div className="rd-section">
-              <span className="rd-label-row">تباعد الأسطر</span>
-              <div className="rd-seg">
-                <button className={spacing === 'tight' ? 'is-on' : ''} onClick={() => setSpacing('tight')}>مضغوط</button>
-                <button className={spacing === 'normal' ? 'is-on' : ''} onClick={() => setSpacing('normal')}>مريح</button>
-                <button className={spacing === 'loose' ? 'is-on' : ''} onClick={() => setSpacing('loose')}>واسع</button>
-              </div>
-            </div>
-
-            <div className="rd-section">
-              <label className="rd-label-row" htmlFor="rd-reciter">القارئ</label>
+          {/* منطقة أزرار التحكم */}
+          <div className="mt-4 pt-4 border-t border-border-color flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
+            {/* اختيار القارئ */}
+            <div className="flex items-center gap-2">
+              <label htmlFor="reciter-select" className="text-sm font-medium whitespace-nowrap">
+                القارئ:
+              </label>
               <select
-                id="rd-reciter"
-                className="rd-select"
-                value={reciter.id}
+                id="reciter-select"
+                value={selectedReciter.id}
                 onChange={(e) => {
                   const r = ALL_RECITERS.find((x) => x.id === e.target.value);
-                  if (r) setReciter(r);
+                  if (r) setSelectedReciter(r);
                 }}
+                className="p-2 border border-border-color rounded-md bg-background text-sm font-ui focus:outline-none focus:ring-1 focus:ring-primary min-w-[200px] max-w-[240px]"
+                aria-label="اختر القارئ"
               >
                 {RECITERS_CATEGORIES.filter((c) => c.id !== 'all').map((c) => {
                   const items = ALL_RECITERS.filter((r) => r.category === c.id);
                   if (!items.length) return null;
                   return (
                     <optgroup key={c.id} label={c.name}>
-                      {items.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                      {items.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.name}
+                        </option>
+                      ))}
                     </optgroup>
                   );
                 })}
               </select>
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.6rem' }}>
-                <button className="rd-btn rd-primary" style={{ flex: 1 }} onClick={() => { setSheet(null); togglePlay(); }}>
-                  {isPlaying ? <IconPause /> : <IconPlay />} {isPlaying ? 'إيقاف' : 'استماع'}
-                </button>
-                <a className="rd-btn" style={{ flex: 1 }} href={downloadUrl} download>
-                  <IconDownload /> تحميل MP3
-                </a>
-              </div>
             </div>
 
-            <button className="rd-btn" style={{ width: '100%', marginTop: '0.5rem' }} onClick={() => setSheet(null)}>
-              تم
+            {/* زر تشغيل التلاوة */}
+            <button
+              onClick={handleToggleFullSurahPlay}
+              className={`button ${isSurahPlaying ? 'bg-accent' : 'bg-primary'} flex items-center gap-2 min-w-[105px] justify-center transition-colors duration-200`}
+              aria-label={isSurahPlaying ? 'إيقاف مؤقت' : 'تشغيل التلاوة'}
+              disabled={isAudioLoading && !isSurahPlaying}
+            >
+              {isAudioLoading ? (
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : isSurahPlaying ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+              <span className="font-medium text-sm">
+                {isAudioLoading ? 'تحميل...' : isSurahPlaying ? 'إيقاف' : 'تشغيل'}
+              </span>
+            </button>
+
+            {/* زر تحميل MP3 */}
+            <a
+              href={currentDownloadUrl}
+              download
+              className="button-outline flex items-center gap-2 min-w-[100px] justify-center transition-opacity duration-200"
+              aria-label={`تحميل تلاوة ${surah.name}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 17V3" />
+                <path d="m6 11 6 6 6-6" />
+                <path d="M19 21H5" />
+              </svg>
+              <span className="font-medium text-sm">تحميل</span>
+            </a>
+
+            {/* زر تبديل نمط القراءة */}
+            <button
+              onClick={toggleReadingMode}
+              className="button-outline flex items-center gap-2 min-w-[110px] justify-center transition-colors duration-200"
+              title={readingMode === 'scroll' ? 'التبديل إلى نمط الصفحات' : 'التبديل إلى النمط المتدفق'}
+            >
+              {readingMode === 'scroll' ? <IconBookOpen /> : <IconAlignJustify />}
+              <span className="font-medium text-sm">{readingMode === 'scroll' ? 'صفحات' : 'متدفق'}</span>
+            </button>
+
+            {/* زر ملء الشاشة */}
+            <button
+              onClick={toggleFullscreen}
+              className="button-outline flex items-center gap-2 min-w-[95px] justify-center transition-colors duration-200"
+              aria-label={isFullscreen ? 'الخروج من وضع ملء الشاشة' : 'وضع ملء الشاشة'}
+            >
+              {isFullscreen ? <IconMinimize /> : <IconMaximize />}
+              <span className="font-medium text-sm">{isFullscreen ? 'تصغير' : 'تكبير'}</span>
             </button>
           </div>
-        </div>
-      )}
 
-      {/* Page picker sheet */}
-      {sheet === 'pages' && (
-        <div className="rd-overlay" onClick={() => setSheet(null)}>
-          <div className="rd-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="اختيار صفحة">
-            <div className="rd-grab" />
-            <p className="rd-sheet-title">الانتقال إلى صفحة</p>
-            <div className="rd-grid">
-              {pages.map((p, i) => (
-                <button
-                  key={p.number}
-                  className={`rd-btn${i === pageIndex ? ' rd-primary' : ''}`}
-                  onClick={() => { goToPage(i); setSheet(null); }}
-                >
-                  {toAr(p.number)}
-                </button>
-              ))}
+          {/* تنبيه خطأ الصوت */}
+          {audioError && (
+            <p className="text-center text-red-600 text-sm mt-3 px-3 py-2 bg-red-100 border border-red-300 rounded-md" role="alert">
+              {audioError}
+            </p>
+          )}
+        </header>
+
+        {/* ---- محتوى السورة الكريمة ---- */}
+        {readingMode === 'scroll' ? (
+          /* ===== النمط المتدفق ===== */
+          <main
+            ref={surahContentRef}
+            className="quran-card p-6 md:p-10 lg:p-12 font-quran text-center leading-relaxed bg-white shadow-lg max-h-[75vh] overflow-y-auto scroll-smooth text-2xl md:text-3xl"
+            style={{ lineHeight: '2.9' }}
+            aria-label={`نص سورة ${surah.name}`}
+          >
+            {surah.number !== 1 && surah.number !== 9 && (
+              <p className="bismillah text-primary font-bold py-4 text-center">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+            )}
+            {surah.ayahs.map(renderAyah)}
+          </main>
+        ) : (
+          /* ===== نمط الصفحات الأصلي ===== */
+          <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+            <main
+              ref={surahContentRef}
+              className="quran-card p-6 md:p-10 lg:p-12 font-quran text-center leading-relaxed bg-white shadow-lg min-h-[60vh] text-2xl md:text-3xl relative select-none"
+              style={{ lineHeight: '2.9' }}
+              aria-label={`سورة ${surah.name} - صفحة ${currentPage} من ${totalPages}`}
+            >
+              {/* البسملة في الصفحة الأولى فقط (ما عدا التوبة والفاتحة) */}
+              {currentPage === 1 && surah.number !== 1 && surah.number !== 9 && (
+                <p className="bismillah text-primary font-bold py-4 text-center">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+              )}
+              {currentPageAyahs.map(renderAyah)}
+            </main>
+
+            {/* ---- أزرار التنقل بين الصفحات ---- */}
+            <div className="mt-6 flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+              {/* الصفحة السابقة */}
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 1 && !prevSurah}
+                className="button-outline flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed text-sm py-2 px-3 sm:px-4"
+                aria-label="الصفحة السابقة"
+              >
+                <IconChevronRight size={18} />
+                السابقة
+              </button>
+
+              {/* أزرار أرقام الصفحات */}
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {pageNumbers.map((item, idx) =>
+                  item === '...' ? (
+                    <span key={`ellipsis-${idx}`} className="text-foreground/40 px-1">
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      onClick={() => handleGoToPage(item as number)}
+                      className={`w-9 h-9 rounded-full text-sm font-medium transition-all ${
+                        currentPage === item
+                          ? 'bg-primary text-white shadow-md scale-110'
+                          : 'bg-card-bg border border-border-color text-foreground/70 hover:bg-primary/10'
+                      }`}
+                      aria-label={`الانتقال إلى الصفحة ${item}`}
+                      aria-current={currentPage === item ? 'page' : undefined}
+                    >
+                      {toAr(item as number)}
+                    </button>
+                  )
+                )}
+              </div>
+
+              {/* الصفحة التالية */}
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages && !nextSurah}
+                className="button-outline flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed text-sm py-2 px-3 sm:px-4"
+                aria-label="الصفحة التالية"
+              >
+                التالية
+                <IconChevronLeft size={18} />
+              </button>
+            </div>
+
+            {/* شريط تقدم القراءة */}
+            <div className="mt-4 flex flex-col items-center gap-1">
+              <div className="w-full max-w-sm h-2 bg-border-color rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{ width: `${(currentPage / totalPages) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-foreground/60">
+                صفحة {toAr(currentPage)} من {toAr(totalPages)}
+                <span className="hidden sm:inline text-foreground/40 ms-2">(يمكنك سحب الشاشة للتنقل)</span>
+              </p>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {tafsirAyah && (
-        <TafsirModal
-          isOpen={!!tafsirAyah}
-          onClose={() => setTafsirAyah(null)}
-          surahNumber={surah.number}
-          ayahNumber={tafsirAyah}
-        />
-      )}
+        {/* ---- شريط التنقل السفلي ---- */}
+        {!isFullscreen && (
+          <footer className="mt-8 flex justify-between items-center text-sm">
+            {prevSurah ? (
+              <Link
+                href={`/surah/${prevSurah}?page=last`}
+                className="flex items-center text-primary hover:text-accent transition-colors hover-lift"
+                aria-label="السورة السابقة"
+                onMouseEnter={() => prefetchSurah(prevSurah)}
+                onTouchStart={() => prefetchSurah(prevSurah)}
+              >
+                <IconChevronRight size={18} />
+                <span className="me-1 font-medium">السورة السابقة</span>
+              </Link>
+            ) : (
+              <div aria-hidden="true" />
+            )}
+
+            <Link
+              href="/"
+              className="flex items-center text-primary hover:text-accent transition-colors hover-lift font-medium"
+              aria-label="الفهرس"
+            >
+              الفهرس
+            </Link>
+
+            {nextSurah ? (
+              <Link
+                href={`/surah/${nextSurah}`}
+                className="flex items-center text-primary hover:text-accent transition-colors hover-lift"
+                aria-label="السورة التالية"
+                onMouseEnter={() => prefetchSurah(nextSurah)}
+                onTouchStart={() => prefetchSurah(nextSurah)}
+              >
+                <span className="ms-1 font-medium">السورة التالية</span>
+                <IconChevronLeft size={18} />
+              </Link>
+            ) : (
+              <div aria-hidden="true" />
+            )}
+          </footer>
+        )}
+
+        {/* نافذة التفسير الميسر */}
+        {tafsirAyahNumber && (
+          <TafsirModal
+            isOpen={!!tafsirAyahNumber}
+            onClose={() => setTafsirAyahNumber(null)}
+            surahNumber={surah.number}
+            ayahNumber={tafsirAyahNumber}
+          />
+        )}
+      </div>
     </div>
   );
 }
