@@ -1,52 +1,18 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import SurahSelectionModal from "../components/SurahSelectionModal";
 import { surahList } from "../data/surahList";
-
-// بنية بيانات القارئ
-interface ReciterMp3Info {
-  id: string;
-  serverUrl: string;
-  name: string;
-  description?: string;
-}
-
-// قائمة القراء المعتمدة الموسعة
-const recitersList: ReciterMp3Info[] = [
-  { id: 'mishari', serverUrl: 'https://server8.mp3quran.net/afs', name: 'مشاري بن راشد العفاسي', description: 'رواية حفص عن عاصم' },
-  { id: 'abdulbasit', serverUrl: 'https://server7.mp3quran.net/basit', name: 'عبد الباسط عبد الصمد (مرتل)', description: 'رواية حفص عن عاصم' },
-  { id: 'abdulbasit_mjwd', serverUrl: 'https://server7.mp3quran.net/basit_mjwd', name: 'عبد الباسط عبد الصمد (مجود)', description: 'تلاوة مجودة' },
-  { id: 'husary', serverUrl: 'https://server13.mp3quran.net/husr', name: 'محمود خليل الحصري (مرتل)', description: 'رواية حفص عن عاصم' },
-  { id: 'husary_mjwd', serverUrl: 'https://server13.mp3quran.net/husr_mjwd', name: 'محمود خليل الحصري (مجود)', description: 'تلاوة مجودة' },
-  { id: 'minshawi', serverUrl: 'https://server10.mp3quran.net/minsh', name: 'محمد صديق المنشاوي (مرتل)', description: 'رواية حفص عن عاصم' },
-  { id: 'minshawi_mjwd', serverUrl: 'https://server10.mp3quran.net/minsh_mjwd', name: 'محمد صديق المنشاوي (مجود)', description: 'تلاوة مجودة' },
-  { id: 'sudais', serverUrl: 'https://server11.mp3quran.net/sds', name: 'عبد الرحمن السديس', description: 'إمام المسجد الحرام' },
-  { id: 'shuraim', serverUrl: 'https://server12.mp3quran.net/shoraimy', name: 'سعود الشريم', description: 'رواية حفص عن عاصم' },
-  { id: 'maher', serverUrl: 'https://server12.mp3quran.net/maher', name: 'ماهر المعيقلي', description: 'إمام المسجد الحرام' },
-  { id: 'ghamdi', serverUrl: 'https://server6.mp3quran.net/ghamdi', name: 'سعد الغامدي', description: 'رواية حفص عن عاصم' },
-  { id: 'yasser', serverUrl: 'https://server11.mp3quran.net/yasser', name: 'ياسر الدوسري', description: 'إمام المسجد الحرام' },
-  { id: 'frs_a', serverUrl: 'https://server8.mp3quran.net/frs_a', name: 'فارس عباد', description: 'رواية حفص عن عاصم' },
-  { id: 'basfar', serverUrl: 'https://server6.mp3quran.net/bsfr', name: 'عبد الله بصفر', description: 'رواية حفص عن عاصم' },
-  { id: 'balushi', serverUrl: 'https://server11.mp3quran.net/hazza', name: 'هزاع البلوشي', description: 'رواية حفص عن عاصم' },
-  { id: 'ajmi', serverUrl: 'https://server10.mp3quran.net/ajm', name: 'أحمد بن علي العجمي', description: 'رواية حفص عن عاصم' },
-  { id: 'shatri', serverUrl: 'https://server11.mp3quran.net/shatri', name: 'أبو بكر الشاطري', description: 'رواية حفص عن عاصم' },
-  { id: 'hthfi', serverUrl: 'https://server9.mp3quran.net/hthfi', name: 'علي بن عبد الرحمن الحذيفي', description: 'إمام المسجد النبوي' },
-  { id: 'ayyub', serverUrl: 'https://server8.mp3quran.net/ayyub', name: 'محمد أيوب', description: 'رواية حفص عن عاصم' },
-  { id: 'qtm', serverUrl: 'https://server6.mp3quran.net/qtm', name: 'ناصر القطامي', description: 'رواية حفص عن عاصم' },
-  { id: 'jleel', serverUrl: 'https://server10.mp3quran.net/jleel', name: 'خالد الجليل', description: 'رواية حفص عن عاصم' },
-  { id: 'wdee', serverUrl: 'https://server6.mp3quran.net/wdee', name: 'وديع اليمني', description: 'رواية حفص عن عاصم' },
-  { id: 'rifai', serverUrl: 'https://server8.mp3quran.net/rifai', name: 'هاني الرفاعي', description: 'رواية حفص عن عاصم' },
-  { id: 'abkr', serverUrl: 'https://server6.mp3quran.net/abkr', name: 'إدريس أبكر', description: 'رواية حفص عن عاصم' },
-];
+import { ALL_RECITERS, RECITERS_CATEGORIES, ReciterInfo } from "../data/reciters";
 
 export default function AudioDownloadPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedReciter, setSelectedReciter] = useState<ReciterMp3Info | null>(null);
+  const [selectedReciter, setSelectedReciter] = useState<ReciterInfo | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const handleOpenModal = (reciter: ReciterMp3Info) => {
+  const handleOpenModal = (reciter: ReciterInfo) => {
     setSelectedReciter(reciter);
     setIsModalOpen(true);
   };
@@ -56,85 +22,211 @@ export default function AudioDownloadPage() {
     setSelectedReciter(null);
   };
 
-  const filteredReciters = recitersList.filter(r =>
-    r.name.includes(searchTerm) || (r.description && r.description.includes(searchTerm))
-  );
+  // تصفية القراء بحسب الفئة والبحث
+  const filteredReciters = useMemo(() => {
+    let list = ALL_RECITERS;
+
+    if (selectedCategory !== 'all') {
+      if (selectedCategory === 'minshawi') {
+        list = list.filter(r => r.category === 'minshawi' || r.name.includes('المنشاوي'));
+      } else if (selectedCategory === 'mujawwad') {
+        list = list.filter(r => r.name.includes('مجود') || r.subname?.includes('مجود') || r.category === 'mujawwad');
+      } else if (selectedCategory === 'muallim') {
+        list = list.filter(r => r.name.includes('معلم') || r.subname?.includes('معلم') || r.category === 'muallim');
+      } else {
+        list = list.filter(r => r.category === selectedCategory);
+      }
+    }
+
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      list = list.filter(r =>
+        r.name.toLowerCase().includes(term) ||
+        (r.subname && r.subname.toLowerCase().includes(term)) ||
+        r.rewaya.toLowerCase().includes(term)
+      );
+    }
+
+    return list;
+  }, [searchTerm, selectedCategory]);
+
+  // تلاوات الشيخ المنشاوي المميزة
+  const minshawiRecitations = useMemo(() => {
+    return ALL_RECITERS.filter(r => r.category === 'minshawi' || r.name.includes('المنشاوي'));
+  }, []);
 
   return (
-    <div className="min-h-screen p-6 md:p-10 bg-pattern" dir="rtl">
+    <div className="min-h-screen p-4 md:p-10 bg-pattern" dir="rtl">
       <div className="max-w-6xl mx-auto fade-in">
         {/* التنقل للرئيسية */}
-        <nav className="mb-8 flex justify-start">
+        <nav className="mb-6 flex justify-between items-center">
           <Link
             href="/"
             className="flex items-center text-primary hover:text-accent transition-colors hover-lift font-medium text-sm"
             aria-label="العودة إلى فهرس السور"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="me-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" className="me-1.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
             </svg>
-            العودة إلى الرئيسية
+            العودة إلى فهرس المصحف
+          </Link>
+
+          <Link
+            href="/surah/1"
+            className="button-outline text-xs py-1.5 px-3 flex items-center gap-1.5"
+          >
+            📖 قراءة القرآن
           </Link>
         </nav>
 
-        {/* رأس الصفحة الأصلي */}
-        <header className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4 font-quran">القرآن الكريم بصيغة MP3</h1>
-          <h2 className="text-xl md:text-2xl text-foreground/90 mb-4">
-            استمع وحمّل القرآن الكريم بصوت أشهر قراء العالم الإسلامي.
-          </h2>
-          <p className="text-md md:text-lg leading-relaxed text-foreground/80 max-w-3xl mx-auto mb-6">
-            يمكنكم الاستماع للتلاوات أو تحميلها بصيغة MP3، لكل سور القرآن الكريم، بصوت نخبة من القراء.
+        {/* رأس الصفحة */}
+        <header className="text-center mb-8">
+          <span className="inline-block px-3.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-3">
+            المكتبة الصوتية الشاملة • MP3 مجاناً
+          </span>
+          <h1 className="text-3xl md:text-5xl font-bold text-primary mb-3 font-quran">
+            تحميل واستماع القرآن الكريم
+          </h1>
+          <p className="text-base md:text-lg text-foreground/80 max-w-2xl mx-auto mb-6">
+            استمع وحمّل جميع سور القرآن الكريم بجودة عالية MP3 بصوت نخبة من كبار قراء العالم الإسلامي بروابط مباشرة وسريعة.
           </p>
 
-          {/* شريط بحث بين القراء */}
-          <div className="max-w-md mx-auto relative">
+          {/* شريط البحث المطور */}
+          <div className="max-w-xl mx-auto relative mb-6">
             <input
               type="search"
-              placeholder="ابحث عن قارئ..."
+              placeholder="ابحث عن قارئ، رواية، أو نوع التلاوة (مثال: المنشاوي، مرتل، ورش)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-2.5 ps-10 border border-border-color rounded-lg bg-background text-sm font-ui focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+              className="w-full py-3 ps-11 pe-4 border border-border-color rounded-xl bg-card-bg text-sm font-ui focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
               aria-label="البحث عن قارئ"
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40 pointer-events-none"
-              width="18"
-              height="18"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground/40 pointer-events-none"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
             >
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </div>
+
+          {/* تصنيفات القراء السريعة */}
+          <div className="flex gap-2 justify-center flex-wrap max-w-4xl mx-auto">
+            {RECITERS_CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`text-xs md:text-sm py-1.5 px-3.5 rounded-full transition-all border ${
+                  selectedCategory === cat.id
+                    ? 'bg-primary text-white border-primary shadow-sm font-semibold'
+                    : 'bg-card-bg text-foreground/80 border-border-color hover:bg-primary/10'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </header>
 
-        {/* شبكة القراء (الشكل الأصلي المفضل) */}
-        <main>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-fr">
-            {filteredReciters.map((reciter) => (
-              <div key={reciter.id} className="quran-card p-5 flex flex-col text-center scale-in h-full hover:border-primary/50 transition-all">
-                <div className="flex-grow">
-                  <h3 className="text-lg font-semibold text-primary mb-1">{reciter.name}</h3>
-                  {reciter.description && (
-                    <p className="text-xs text-foreground/70 mb-4">{reciter.description}</p>
-                  )}
+        {/* قسم خاص مميز: الشيخ محمد صديق المنشاوي */}
+        {(selectedCategory === 'all' || selectedCategory === 'minshawi') && !searchTerm && (
+          <section className="mb-10 quran-card border-2 border-primary/30 bg-gradient-to-br from-card-bg via-primary/5 to-card-bg p-6 md:p-8 rounded-2xl shadow-md">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 border-b border-border-color/60 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center text-2xl shadow-md">
+                  🎙️
                 </div>
-                <div className="mt-auto pt-4 border-t border-border-color flex flex-col gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-accent text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                      صوت يبكي القلوب
+                    </span>
+                    <span className="text-xs text-foreground/50">تلاوات كاملة 114 سورة</span>
+                  </div>
+                  <h2 className="text-2xl font-bold font-quran text-primary mt-1">
+                    فضيلة الشيخ محمد صديق المنشاوي (رحمه الله)
+                  </h2>
+                </div>
+              </div>
+              <p className="text-xs text-foreground/70 max-w-sm text-center md:text-left">
+                اختر نوع المصحف للاستماع المباشر أو تحميل السور بصيغة MP3 عالية النقاء
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {minshawiRecitations.map((reciter) => (
+                <div
+                  key={reciter.id}
+                  className="bg-card-bg border border-border-color hover:border-primary/60 rounded-xl p-4 flex flex-col justify-between transition-all hover:shadow-md hover:-translate-y-0.5"
+                >
+                  <div>
+                    <span className="text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-md inline-block mb-2">
+                      {reciter.rewaya}
+                    </span>
+                    <h3 className="text-base font-bold text-primary mb-1">
+                      {reciter.name}
+                    </h3>
+                    <p className="text-xs text-foreground/70 mb-4 leading-relaxed">
+                      {reciter.subname}
+                    </p>
+                  </div>
+
                   <button
                     onClick={() => handleOpenModal(reciter)}
-                    className="button-outline text-sm px-4 py-2 flex items-center justify-center gap-1.5 w-full hover:bg-primary hover:text-white transition-colors"
+                    className="button text-xs py-2 px-3 w-full flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>
+                    استماع / تحميل السور
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* شبكة القراء الكاملة */}
+        <main>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+              <span>قائمة القراء والمصاحف الكاملة</span>
+              <span className="text-xs font-normal text-foreground/50 bg-foreground/5 px-2 py-0.5 rounded-full">
+                {filteredReciters.length} قارئ ومصحف
+              </span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
+            {filteredReciters.map((reciter) => (
+              <div
+                key={reciter.id}
+                className="quran-card p-5 flex flex-col text-center scale-in h-full hover:border-primary/60 hover:shadow-md transition-all rounded-xl"
+              >
+                <div className="flex-grow">
+                  <span className="text-[10px] font-medium text-foreground/60 bg-foreground/5 px-2 py-0.5 rounded-full inline-block mb-2">
+                    {reciter.rewaya}
+                  </span>
+                  <h3 className="text-base font-bold text-primary mb-1">
+                    {reciter.name}
+                  </h3>
+                  {reciter.subname && (
+                    <p className="text-xs text-foreground/70 mb-4">{reciter.subname}</p>
+                  )}
+                </div>
+
+                <div className="mt-auto pt-3 border-t border-border-color/60 flex flex-col gap-2">
+                  <button
+                    onClick={() => handleOpenModal(reciter)}
+                    className="button-outline text-xs px-3 py-2 flex items-center justify-center gap-1.5 w-full hover:bg-primary hover:text-white transition-colors rounded-lg"
                     aria-label={`استعراض سور القارئ ${reciter.name}`}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 12c-2 0-4.5 1-6 3.5V6.5C7.5 5 10 4 12 4s4.5 1 6 2.5V15c-1.5-2.5-4-3.5-6-3.5zM6 18.5c1.5-2.5 4-3.5 6-3.5s4.5 1 6 3.5" />
-                      <path d="M12 4v15" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/>
                     </svg>
                     استماع / تحميل السور
                   </button>
@@ -144,13 +236,20 @@ export default function AudioDownloadPage() {
           </div>
 
           {filteredReciters.length === 0 && (
-            <div className="text-center py-12 quran-card">
-              <p className="text-foreground/70">لم يتم العثور على قراء يطابقون بحثك.</p>
+            <div className="text-center py-16 quran-card rounded-2xl">
+              <span className="text-4xl block mb-2">🔍</span>
+              <p className="text-foreground/70 mb-2">لم يتم العثور على قراء يطابقون بحثك.</p>
+              <button
+                onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
+                className="button-outline text-xs py-1.5 px-4"
+              >
+                إعادة ضبط البحث
+              </button>
             </div>
           )}
         </main>
 
-        {/* النافذة المنبثقة لاختيار السور والأجزاء والأحزاب */}
+        {/* النافذة المنبثقة لاختيار السور والتحميل */}
         {selectedReciter && (
           <SurahSelectionModal
             isOpen={isModalOpen}

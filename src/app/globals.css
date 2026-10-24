@@ -317,7 +317,126 @@ button:disabled, .button:disabled {
   transition: background-color 0.3s ease-out; /* Smooth transition */
 }
 
-/* Optional: Style for currently playing ayah segment (if needed later) */
-/* .ayah-playing {
-  color: var(--accent);
-} */ 
+/* ========================================================
+   أوضاع راحة العين (Eye Comfort Reading Modes)
+   ======================================================== */
+.reading-theme-sepia {
+  --reader-bg: #f7f2e5;
+  --reader-card: #fdfaf3;
+  --reader-text: #2c221a;
+  --reader-border: #dcd0b8;
+  --reader-accent: #a0683a;
+  --reader-verse: #8c5b32;
+  --reader-frame: #bda886;
+  background-color: var(--reader-bg) !important;
+  color: var(--reader-text) !important;
+}
+
+.reading-theme-night {
+  --reader-bg: #12161b;
+  --reader-card: #192027;
+  --reader-text: #e6e2d8;
+  --reader-border: #2c3846;
+  --reader-accent: #e2b357;
+  --reader-verse: #d4a745;
+  --reader-frame: #405264;
+  background-color: var(--reader-bg) !important;
+  color: var(--reader-text) !important;
+}
+
+.reading-theme-emerald {
+  --reader-bg: #edf4ef;
+  --reader-card: #f6fbf7;
+  --reader-text: #172d1f;
+  --reader-border: #c4dccb;
+  --reader-accent: #2c774b;
+  --reader-verse: #2e7d50;
+  --reader-frame: #8fb89c;
+  background-color: var(--reader-bg) !important;
+  color: var(--reader-text) !important;
+}
+
+.reading-theme-light {
+  --reader-bg: #f8fafc;
+  --reader-card: #ffffff;
+  --reader-text: #1e293b;
+  --reader-border: #e2e8f0;
+  --reader-accent: #3b82f6;
+  --reader-verse: #5d7a6a;
+  --reader-frame: #cbd5e1;
+  background-color: var(--reader-bg) !important;
+  color: var(--reader-text) !important;
+}
+
+/* ========================================================
+   إطار المصحف الشريف الحقيقي (Authentic Mushaf Frame)
+   ======================================================== */
+.mushaf-page-container {
+  background-color: var(--reader-card, #ffffff);
+  color: var(--reader-text, #3a2e28);
+  border: 1px solid var(--reader-border, #e8e1d2);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.mushaf-inner-frame {
+  border: 2px solid var(--reader-frame, #a08c6d);
+  outline: 1px solid var(--reader-border, #e8e1d2);
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+  padding: 1.5rem 1.25rem;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .mushaf-inner-frame {
+    padding: 2.5rem 3rem;
+    border-width: 3px;
+    outline-width: 2px;
+    outline-offset: 6px;
+  }
+}
+
+/* ترويسة اسم السورة بالمصحف (Surah Banner) */
+.mushaf-surah-header-banner {
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.08) 0%, rgba(var(--accent-rgb), 0.16) 50%, rgba(var(--accent-rgb), 0.08) 100%);
+  border: 2px solid var(--reader-frame, var(--primary));
+  border-radius: 9999px;
+  padding: 0.6rem 1.5rem;
+  margin: 1.5rem auto 2rem auto;
+  max-width: 32rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* آيات القرآن في النمط المتدفق ومصحف الصفحات */
+.ayah-segment {
+  cursor: pointer;
+  border-radius: 0.35rem;
+  padding: 0.15rem 0.2rem;
+  transition: background-color 0.2s ease;
+  display: inline;
+}
+
+.ayah-segment:hover {
+  background-color: rgba(var(--accent-rgb), 0.12);
+}
+
+.ayah-segment.active-playing {
+  background-color: rgba(var(--accent-rgb), 0.25);
+  box-shadow: 0 0 0 2px var(--reader-accent, var(--accent));
+}
+
+.mushaf-verse-badge {
+  color: var(--reader-verse, var(--primary));
+  font-family: var(--font-quran), 'Amiri', serif;
+  font-weight: bold;
+  font-size: 0.85em;
+  padding: 0 0.35rem;
+  display: inline-block;
+  user-select: none;
+}
+ 

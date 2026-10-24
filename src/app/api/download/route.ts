@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const url = searchParams.get('url');
-  const filename = searchParams.get('filename') || 'audio.mp3';
+  const filename = searchParams.get('filename') || 'quran-audio.mp3';
 
   if (!url) {
     return new NextResponse('URL parameter is required', { status: 400 });
@@ -14,41 +14,48 @@ export async function GET(request: NextRequest) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-
-    const response = await fetch(url, {
-      signal: controller.signal,
+    // جلب الملف الصوتي مع تتبع التوجيهات تلقائياً (follow redirects)
+    const upstreamResponse = await fetch(url, {
+      redirect: 'follow',
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: '*/*',
       },
     });
-    clearTimeout(timeout);
 
-    if (!response.ok) {
-      // إذا فشل الخادم في الجلب، نحول المتصفح مباشرة إلى رابط الملف
+    if (!upstreamResponse.ok || !upstreamResponse.body) {
+      // في حال تعثر الخادم نحول المتصفح للرابط مباشرة
       return NextResponse.redirect(url, 302);
     }
 
     const headers = new Headers();
-    headers.set('Content-Type', response.headers.get('content-type') || 'audio/mpeg');
+    const contentType = upstreamResponse.headers.get('content-type') || 'audio/mpeg';
+    headers.set('Content-Type', contentType);
+
+    // تجهيز اسم الملف باللغة العربية بطريقة قياسية متوافقة مع جميع المتصفحات RFC 5987
+    const encodedFilename = encodeURIComponent(filename);
+    const asciiSafeFilename = filename.replace(/[^\x20-\x7E]/g, '_');
     headers.set(
       'Content-Disposition',
-      `attachment; filename="${encodeURIComponent(filename)}"; filename*=UTF-8''${encodeURIComponent(filename)}`
+      `attachment; filename="${asciiSafeFilename}"; filename*=UTF-8''${encodedFilename}`
     );
 
-    const contentLength = response.headers.get('content-length');
+    const contentLength = upstreamResponse.headers.get('content-length');
     if (contentLength) {
       headers.set('Content-Length', contentLength);
     }
 
-    return new NextResponse(response.body, {
+    headers.set('Accept-Ranges', 'bytes');
+    headers.set('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+
+    // تمرير دفق البيانات مباشرة لتقليل استهلاك الذاكرة وسرعة التحميل
+    return new NextResponse(upstreamResponse.body, {
       status: 200,
       headers,
     });
-  } catch {
-    // في حال وجود مشكلة شبكة داخل الخادم، يتم توجيه المتصفح مباشرة
+  } catch (err) {
+    console.error('Download route error:', err);
     return NextResponse.redirect(url, 302);
   }
 }

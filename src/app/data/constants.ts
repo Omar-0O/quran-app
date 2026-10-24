@@ -1,3 +1,17 @@
+import { ALL_RECITERS, ReciterInfo } from './reciters';
+
+export interface AyahData {
+  number: number;
+  numberInSurah: number;
+  text: string;
+  juz?: number;
+  manzil?: number;
+  page?: number;
+  ruku?: number;
+  hizbQuarter?: number;
+  sajda?: boolean | object;
+}
+
 export interface SurahData {
   number: number;
   name: string;
@@ -5,37 +19,23 @@ export interface SurahData {
   englishNameTranslation: string;
   revelationType: string;
   numberOfAyahs: number;
-  ayahs: Array<{
-    number: number;
-    numberInSurah: number;
-    text: string;
-  }>;
+  ayahs: AyahData[];
 }
 
 export interface Reciter {
-  id: number;
+  id: string | number;
   name: string;
+  serverUrl?: string;
+  subname?: string;
 }
 
-export const RECITERS: Reciter[] = [
-  { id: 7,  name: 'مشاري بن راشد العفاسي' },
-  { id: 1,  name: 'عبد الباسط عبد الصمد (مرتل)' },
-  { id: 3,  name: 'عبد الرحمن السديس' },
-  { id: 2,  name: 'محمود خليل الحصري' },
-  { id: 5,  name: 'سعد الغامدي' },
-  { id: 11, name: 'سعود الشريم' },
-  { id: 9,  name: 'محمد صديق المنشاوي' },
-  { id: 4,  name: 'عبد الله بصفر' },
-  { id: 10, name: 'ماهر المعيقلي' },
-  { id: 12, name: 'ياسر الدوسري' },
-  { id: 13, name: 'فارس عباد' },
-  { id: 17, name: 'أكرم العلاقمي' },
-  { id: 6,  name: 'عبد الباسط عبد الصمد (مجود)' },
-  { id: 8,  name: 'إدريس أبكر' },
-  { id: 14, name: 'خالد الجليل' },
-  { id: 15, name: 'هاني الرفاعي' },
-  { id: 16, name: 'وديع اليمني' },
-  { id: 18, name: 'محمد أيوب' },
-  { id: 19, name: 'علي الحذيفي' },
-  { id: 20, name: 'أحمد نعينع' },
-];
+// قائمة القراء المعتمدة المستندة إلى سيرفرات MP3Quran السريعة والمستقرة
+export const RECITERS: Reciter[] = ALL_RECITERS.map((r) => ({
+  id: r.id,
+  name: r.name,
+  serverUrl: r.serverUrl,
+  subname: r.subname,
+}));
+
+export { ALL_RECITERS };
+export type { ReciterInfo };
