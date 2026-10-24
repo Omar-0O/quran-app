@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { prefetchSurah } from '../data/quranCache';
 
 // Define the expected Surah shape directly
 interface SurahInfo {
@@ -19,6 +20,8 @@ export default function SurahCard({ surah, index }: SurahCardProps) {
   return (
     <Link
       href={`/surah/${surah.number}`}
+      onMouseEnter={() => prefetchSurah(surah.number)}
+      onTouchStart={() => prefetchSurah(surah.number)}
       className="quran-card block hover-lift slide-in group h-full" // Added h-full for consistent grid height
       style={{ animationDelay: `${index * 20}ms` }} // Adjusted delay slightly
       aria-label={`الانتقال إلى سورة ${surah.name}`}

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { surahList, SurahInfoBasic } from './data/surahList'; // Import the Surah type
+import { prefetchSurah } from './data/quranCache';
 
 export default function HomePage() {
   const [filter, setFilter] = useState<'all' | 'meccan' | 'medinan'>('all');
@@ -29,6 +30,12 @@ export default function HomePage() {
 
     return surahs;
   }, [filter, searchTerm]); // Add searchTerm dependency
+
+  // Proactively prefetch common opening surahs in background idle time
+  useEffect(() => {
+    prefetchSurah(1);
+    prefetchSurah(2);
+  }, []);
 
   return (
     <main className="min-h-screen p-6 md:p-10 bg-pattern">
@@ -109,7 +116,12 @@ export default function HomePage() {
         {filteredSurahs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredSurahs.map((surah: SurahInfoBasic) => (
-              <Link key={surah.number} href={`/surah/${surah.number}`}>
+              <Link
+                key={surah.number}
+                href={`/surah/${surah.number}`}
+                onMouseEnter={() => prefetchSurah(surah.number)}
+                onTouchStart={() => prefetchSurah(surah.number)}
+              >
                 <div className="quran-card h-full p-5 flex justify-between items-center hover-lift scale-in" title={`سورة ${surah.name} (${surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}) - ${surah.numberOfAyahs} آيات`}>
                   <div className="text-right">
                     <p className="text-sm text-primary font-medium mb-1">

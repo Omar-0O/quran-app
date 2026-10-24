@@ -11,6 +11,13 @@ import {
   getSurahAudioUrl,
   getSurahDownloadUrl,
 } from '../../data/reciters';
+import {
+  getCachedSurah,
+  loadSurah,
+  prefetchSurah,
+  getLastVisitedPage,
+  saveLastVisitedPage,
+} from '../../data/quranCache';
 import TafsirModal from '../../components/TafsirModal';
 import '../../styles/reader.css';
 
@@ -99,10 +106,13 @@ function SurahPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const highlightedAyahParam = searchParams.get('ayah');
+  const pageParam = searchParams.get('page');
   const surahId = parseInt(params.id as string);
 
-  const [surah, setSurah] = useState<SurahData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Synchronous cache retrieval – 0ms rendering if visited before or prefetched
+  const initialSurah = useMemo(() => getCachedSurah(surahId), [surahId]);
+  const [surah, setSurah] = useState<SurahData | null>(() => getCachedSurah(surahId));
+  const [loading, setLoading] = useState<boolean>(() => !getCachedSurah(surahId));
   const [fetchError, setFetchError] = useState('');
 
   /* reader preferences */
@@ -114,7 +124,15 @@ function SurahPageContent() {
   const [prefsLoaded, setPrefsLoaded] = useState(false);
 
   /* ui state */
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState<number>(() => {
+    if (pageParam === 'last') return 0; // Will be set to pages.length - 1 once pages are computed
+    if (pageParam) {
+      const p = parseInt(pageParam, 10);
+      if (!isNaN(p) && p > 0) return p - 1;
+    }
+    const saved = getLastVisitedPage(surahId);
+    return saved != null ? saved : 0;
+  });
   const [sheet, setSheet] = useState<null | 'settings' | 'pages'>(null);
   const [selectedAyah, setSelectedAyah] = useState<AyahData | null>(null);
   const [tafsirAyah, setTafsirAyah] = useState<number | null>(null);
@@ -132,6 +150,7 @@ function SurahPageContent() {
   const [immersive, setImmersive] = useState(false);
   const touchRef = useRef<{ x: number; y: number } | null>(null);
   const jumpedRef = useRef(false);
+  const initialPageSurahRef = useRef<number | null>(null);
 
   const prevSurah = surahId > 1 ? surahId - 1 : null;
   const nextSurah = surahId < 114 ? surahId + 1 : null;
@@ -175,30 +194,41 @@ function SurahPageContent() {
     }
   }, [prefsLoaded, theme, mode, fontSize, font, spacing, reciter.id]);
 
-  /* ----- fetch surah ----- */
+  /* ----- fetch / cache surah ----- */
   useEffect(() => {
     let cancelled = false;
-    const run = async () => {
-      setLoading(true);
+    jumpedRef.current = false;
+    setSelectedAyah(null);
+
+    const cached = getCachedSurah(surahId);
+    if (cached) {
+      setSurah(cached);
+      setLoading(false);
       setFetchError('');
-      setSurah(null);
-      setPageIndex(0);
-      setSelectedAyah(null);
-      jumpedRef.current = false;
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_QURAN_CLOUD_API_URL || 'https://api.alquran.cloud/v1';
-        const res = await fetch(`${baseUrl}/surah/${surahId}`);
-        const data = await res.json();
+      // Background prefetching of adjacent surahs so flipping is instant
+      if (surahId > 1) prefetchSurah(surahId - 1);
+      if (surahId < 114) prefetchSurah(surahId + 1);
+      return;
+    }
+
+    setLoading(true);
+    setFetchError('');
+    setSurah(null);
+
+    loadSurah(surahId)
+      .then((data) => {
         if (cancelled) return;
-        if (data.code === 200 && data.data) setSurah(data.data);
-        else throw new Error('فشل تحميل بيانات السورة.');
-      } catch (err) {
-        if (!cancelled) setFetchError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع.');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    run();
+        setSurah(data);
+        setLoading(false);
+        if (surahId > 1) prefetchSurah(surahId - 1);
+        if (surahId < 114) prefetchSurah(surahId + 1);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setFetchError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع.');
+        setLoading(false);
+      });
+
     return () => {
       cancelled = true;
     };
@@ -217,6 +247,48 @@ function SurahPageContent() {
       .sort((a, b) => a - b)
       .map((p) => ({ number: p, ayahs: map.get(p)!, juz: map.get(p)![0]?.juz || 1 }));
   }, [surah]);
+
+  // Handle page positioning without resetting to 0 every time
+  useEffect(() => {
+    if (!pages.length) return;
+
+    if (highlightedAyahParam) {
+      initialPageSurahRef.current = surahId;
+      return;
+    }
+
+    if (pageParam === 'last') {
+      setPageIndex(pages.length - 1);
+      initialPageSurahRef.current = surahId;
+      return;
+    }
+
+    if (pageParam) {
+      const p = parseInt(pageParam, 10);
+      if (!isNaN(p) && p > 0) {
+        setPageIndex(Math.max(0, Math.min(pages.length - 1, p - 1)));
+        initialPageSurahRef.current = surahId;
+        return;
+      }
+    }
+
+    if (initialPageSurahRef.current !== surahId) {
+      const saved = getLastVisitedPage(surahId);
+      if (saved != null && saved >= 0 && saved < pages.length) {
+        setPageIndex(saved);
+      } else {
+        setPageIndex(0);
+      }
+      initialPageSurahRef.current = surahId;
+    }
+  }, [surahId, pages, pageParam, highlightedAyahParam]);
+
+  // Persist reading position for this surah
+  useEffect(() => {
+    if (surah && pages.length > 0 && pageIndex >= 0 && pageIndex < pages.length) {
+      saveLastVisitedPage(surah.number, pageIndex);
+    }
+  }, [surah, pages.length, pageIndex]);
 
   const page = pages[pageIndex];
   const isPageMode = mode === 'page' && !!page;
@@ -302,13 +374,63 @@ function SurahPageContent() {
 
   // Next / previous page; at the edges move on to the neighbouring surah
   const goNext = useCallback(() => {
-    if (pageIndex < pages.length - 1) goToPage(pageIndex + 1);
-    else if (nextSurah) router.push(`/surah/${nextSurah}`);
+    if (pageIndex < pages.length - 1) {
+      goToPage(pageIndex + 1);
+    } else if (nextSurah) {
+      if (nextSurah + 1 <= 114) prefetchSurah(nextSurah + 1);
+      router.push(`/surah/${nextSurah}`);
+    }
   }, [pageIndex, pages.length, goToPage, nextSurah, router]);
+
   const goPrev = useCallback(() => {
-    if (pageIndex > 0) goToPage(pageIndex - 1);
-    else if (prevSurah) router.push(`/surah/${prevSurah}`);
+    if (pageIndex > 0) {
+      goToPage(pageIndex - 1);
+    } else if (prevSurah) {
+      if (prevSurah - 1 >= 1) prefetchSurah(prevSurah - 1);
+      router.push(`/surah/${prevSurah}?page=last`);
+    }
   }, [pageIndex, goToPage, prevSurah, router]);
+
+  /* ----- mode switching preserving position ----- */
+  const switchToScroll = useCallback(() => {
+    if (mode === 'scroll') return;
+    const currentFirstAyah = page?.ayahs[0]?.numberInSurah;
+    setMode('scroll');
+    if (currentFirstAyah) {
+      setTimeout(() => {
+        const el = document.getElementById(`ayah-${currentFirstAyah}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 60);
+    }
+  }, [mode, page]);
+
+  const switchToPage = useCallback(() => {
+    if (mode === 'page') return;
+    let target = pageIndex;
+    if (surah && pages.length > 0) {
+      const ayahEls = document.querySelectorAll('.rd-ayah');
+      let foundAyah: number | null = null;
+      for (let i = 0; i < ayahEls.length; i++) {
+        const rect = ayahEls[i].getBoundingClientRect();
+        if (rect.top >= 40 && rect.top <= window.innerHeight * 0.6) {
+          const num = parseInt(ayahEls[i].id.replace('ayah-', ''), 10);
+          if (!isNaN(num)) {
+            foundAyah = num;
+            break;
+          }
+        }
+      }
+      if (foundAyah != null) {
+        const idx = pages.findIndex((p) => p.ayahs.some((a) => a.numberInSurah === foundAyah));
+        if (idx !== -1) target = idx;
+      }
+    }
+    setMode('page');
+    setPageIndex(target);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [mode, pageIndex, pages, surah]);
 
   useEffect(() => {
     if (!isPageMode) return;
@@ -587,10 +709,24 @@ function SurahPageContent() {
         {(!isPageMode || (isLastPage && !immersive)) && (
           <div className="rd-endnav">
             {prevSurah ? (
-              <Link href={`/surah/${prevSurah}`} className="rd-btn"><IconBack /> السورة السابقة</Link>
+              <Link
+                href={`/surah/${prevSurah}?page=last`}
+                className="rd-btn"
+                onMouseEnter={() => prefetchSurah(prevSurah)}
+                onTouchStart={() => prefetchSurah(prevSurah)}
+              >
+                <IconBack /> السورة السابقة
+              </Link>
             ) : <span />}
             {nextSurah ? (
-              <Link href={`/surah/${nextSurah}`} className="rd-btn rd-primary">السورة التالية <IconNext /></Link>
+              <Link
+                href={`/surah/${nextSurah}`}
+                className="rd-btn rd-primary"
+                onMouseEnter={() => prefetchSurah(nextSurah)}
+                onTouchStart={() => prefetchSurah(nextSurah)}
+              >
+                السورة التالية <IconNext />
+              </Link>
             ) : <span />}
           </div>
         )}
@@ -604,7 +740,14 @@ function SurahPageContent() {
               <IconBack /> السابقة
             </button>
           ) : prevSurah ? (
-            <Link href={`/surah/${prevSurah}`} className="rd-btn"><IconBack /> السورة السابقة</Link>
+            <Link
+              href={`/surah/${prevSurah}?page=last`}
+              className="rd-btn"
+              onMouseEnter={() => prefetchSurah(prevSurah)}
+              onTouchStart={() => prefetchSurah(prevSurah)}
+            >
+              <IconBack /> السورة السابقة
+            </Link>
           ) : <span />}
 
           <button className="rd-btn rd-pagejump" onClick={() => setSheet('pages')} aria-label="اختيار صفحة">
@@ -617,7 +760,14 @@ function SurahPageContent() {
               التالية <IconNext />
             </button>
           ) : nextSurah ? (
-            <Link href={`/surah/${nextSurah}`} className="rd-btn rd-primary">السورة التالية <IconNext /></Link>
+            <Link
+              href={`/surah/${nextSurah}`}
+              className="rd-btn rd-primary"
+              onMouseEnter={() => prefetchSurah(nextSurah)}
+              onTouchStart={() => prefetchSurah(nextSurah)}
+            >
+              السورة التالية <IconNext />
+            </Link>
           ) : <span />}
         </nav>
       )}
@@ -643,10 +793,10 @@ function SurahPageContent() {
             <div className="rd-section">
               <span className="rd-label-row">أسلوب القراءة</span>
               <div className="rd-seg">
-                <button className={mode === 'scroll' ? 'is-on' : ''} onClick={() => { setMode('scroll'); window.scrollTo({ top: 0 }); }}>
+                <button className={mode === 'scroll' ? 'is-on' : ''} onClick={switchToScroll}>
                   متتابع
                 </button>
-                <button className={mode === 'page' ? 'is-on' : ''} onClick={() => { setMode('page'); setPageIndex(0); window.scrollTo({ top: 0 }); }}>
+                <button className={mode === 'page' ? 'is-on' : ''} onClick={switchToPage}>
                   صفحات المصحف
                 </button>
               </div>

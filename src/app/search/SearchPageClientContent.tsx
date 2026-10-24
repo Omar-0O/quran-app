@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import SearchBar from '../components/SearchBar';
+import { prefetchSurah } from '../data/quranCache';
 
 interface SearchResultItem {
   surah: number;
@@ -179,6 +180,8 @@ export default function SearchPageClientContent() { // Renamed function
                 <Link
                   key={index} // Consider using a more stable key if possible (e.g., `${result.surah}-${result.ayah}`)
                   href={`/surah/${result.surah}?ayah=${result.ayah}`}
+                  onMouseEnter={() => prefetchSurah(result.surah)}
+                  onTouchStart={() => prefetchSurah(result.surah)}
                   className="quran-card p-6 block hover:shadow-md transition-shadow hover-lift slide-in"
                   style={{animationDelay: `${index * 0.05}s`}}
                 >
